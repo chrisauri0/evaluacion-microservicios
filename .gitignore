@@ -1,0 +1,61 @@
+# ==== Maven ====
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ==== Compiled class files ====
+*.class
+
+# ==== Spring Boot ====
+*.jar
+*.war
+!**/src/main/**/*.jar
+
+# ==== IDE - IntelliJ ====
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# ==== IDE - VS Code ====
+.vscode/
+
+# ==== IDE - Eclipse / STS ====
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+
+# ==== OS ====
+.DS_Store
+Thumbs.db
+
+# ==== Logs ====
+*.log
+logs/
+
+# ==== Environment / secrets ====
+.env
+.env.*
+application-secrets.yml
+application-local.yml
+
+# ==== Docker ====
+# (normalmente NO se ignora docker-compose.yml ni los Dockerfiles,
+# pero sí volúmenes o data persistida si la generas)
+docker-data/
+
+# ==== Node (por si el api-gateway o algo usa frontend) ====
+node_modules/
+
+# ==== Misc ====
+*.pid
+*.seed
+*.pid.lock
+HELP.md

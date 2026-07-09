@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - micro-net
+
+  auth-server:
+    build: ./auth-server
+    container_name: auth-server
+    depends_on:
+      - eureka-server
+    ports:
+      - "9000:9000"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - micro-net
+
+  microservicio-usuarios:
+    build: ./microservicio-usuarios
+    container_name: microservicio-usuarios
+    restart: on-failure
+    depends_on:
+      - eureka-server
+      - auth-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - micro-net
+
+  microservicio-posts:
+    build: ./microservicio-posts
+    container_name: microservicio-posts
+    restart: on-failure
+    depends_on:
+      - eureka-server
+      - auth-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - micro-net
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: on-failure
+    depends_on:
+      - microservicio-usuarios
+      - microservicio-posts
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - micro-net
+
+networks:
+  micro-net:
+    driver: bridge
