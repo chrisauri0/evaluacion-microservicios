@@ -1,6 +1,25 @@
 version: "3.8"
-
 services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: on-failure
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: auth_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - micro-net
+
   eureka-server:
     build: ./eureka-server
     container_name: eureka-server
@@ -13,22 +32,17 @@ services:
     build: ./auth-server
     container_name: auth-server
     depends_on:
-      - eureka-server
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
     ports:
       - "9000:9000"
     environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
-    networks:
-      - micro-net
-
-  microservicio-usuarios:
-    build: ./microservicio-usuarios
-    container_name: microservicio-usuarios
-    restart: on-failure
-    depends_on:
-      - eureka-server
-      - auth-server
-    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/posts_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root_password
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     networks:
       - micro-net
@@ -36,29 +50,50 @@ services:
   microservicio-posts:
     build: ./microservicio-posts
     container_name: microservicio-posts
-    restart: on-failure
     depends_on:
-      - eureka-server
-      - auth-server
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      auth-server:
+        condition: service_started
     environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/posts_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root_password
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://auth-server:9000
+
+    networks:
+      - micro-net
+
+  microservicio-usuarios:
+    build: ./microservicio-usuarios
+    container_name: microservicio-usuarios
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      auth-server:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/usuarios_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root_password
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka\
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://auth-server:9000
     networks:
       - micro-net
 
   api-gateway:
     build: ./api-gateway
     container_name: api-gateway
-    restart: on-failure
-    depends_on:
-      - microservicio-usuarios
-      - microservicio-posts
-    ports:
-      - "8080:8080"
-    environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
-    networks:
-      - micro-net
+
 
 networks:
   micro-net:
     driver: bridge
+
+volumes:
+  mysql-data:
