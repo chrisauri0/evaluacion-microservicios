@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: microservicio-posts
+          uri: lb://MICROSERVICIO-POSTS
+          predicates:
+            - Path=/api/posts/**
+
+        - id: microservicio-usuarios
+          uri: lb://MICROSERVICIO-USUARIOS
+          predicates:
+            - Path=/api/usuarios/**
+        - id: microservicio-comentarios
+          uri: lb://MICROSERVICIO-COMENTARIOS
+          predicates:
+            - Path=/api/comentarios/**
+
+        - id: microservicio-restricciones
+          uri: lb://MICROSERVICIO-RESTRICCIONES
+          predicates:
+            - Path=/api/restricciones/**
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true

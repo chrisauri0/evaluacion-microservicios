@@ -1,12 +1,12 @@
 server:
-  port: 8082
+  port: 8084
 
 spring:
   application:
-    name: microservicio-usuarios
+    name: microservicio-restricciones
 
   datasource:
-    url: jdbc:mysql://mysql:3306/usuarios_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://mysql:3306/restricciones_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
     password: tu_password
     driver-class-name: com.mysql.cj.jdbc.Driver

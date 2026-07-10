@@ -1,12 +1,12 @@
 server:
-  port: 8082
+  port: 8083
 
 spring:
   application:
-    name: microservicio-usuarios
+    name: microservicio-comentarios
 
   datasource:
-    url: jdbc:mysql://mysql:3306/usuarios_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://mysql:3306/comentarios_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
     password: tu_password
     driver-class-name: com.mysql.cj.jdbc.Driver
