@@ -1,6 +1,6 @@
 package com.example.microservicio_usuarios.config;
 
-import com.example.microservicio_usuarios.model.Usuario;
+import com.example.microservicio_usuarios.entity.Usuario;
 import com.example.microservicio_usuarios.repository.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;

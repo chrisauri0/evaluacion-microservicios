@@ -1,7 +1,9 @@
 package com.example.microservicio_usuarios.repository;
 
-import com.example.microservicio_usuarios.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.microservicio_usuarios.entity.Usuario;
+
 import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {

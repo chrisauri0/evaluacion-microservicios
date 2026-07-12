@@ -2,7 +2,7 @@ package com.example.microservicio_usuarios.controller;
 
 
 import com.example.microservicio_usuarios.dto.UsuarioRequest;
-import com.example.microservicio_usuarios.model.Usuario;
+import com.example.microservicio_usuarios.entity.Usuario;
 import com.example.microservicio_usuarios.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<Usuario> crear(@RequestBody UsuarioRequest request) {
+    public ResponseEntity<Usuario> crear(@RequestBody SolicitudAmistadResponse request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.crear(request));
     }
 
@@ -43,7 +43,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @RequestBody UsuarioRequest request) {
+    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @RequestBody SolicitudAmistadResponse request) {
         return ResponseEntity.ok(usuarioService.actualizar(id, request));
     }
 

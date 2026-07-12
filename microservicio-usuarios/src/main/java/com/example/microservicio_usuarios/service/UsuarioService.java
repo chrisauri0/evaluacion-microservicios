@@ -1,8 +1,7 @@
 package com.example.microservicio_usuarios.service;
 
-
-import com.example.microservicio_usuarios.dto.UsuarioRequest;
-import com.example.microservicio_usuarios.model.Usuario;
+import com.example.microservicio_usuarios.dto.UsuarioRequest; // Debes usar este
+import com.example.microservicio_usuarios.entity.Usuario;    // Tu entidad ahora está aquí
 import com.example.microservicio_usuarios.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +16,17 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public Usuario crear(UsuarioRequest request) {
+    public Usuario crear(UsuarioRequest request) { // Corregido el parámetro
         if (usuarioRepository.existsByEmail(request.getEmail())) {
             throw new IllegalStateException("El email ya está registrado");
         }
-        Usuario usuario = new Usuario(request.getId(), request.getUsername(), request.getEmail(), request.getNombre());
+        
+        Usuario usuario = new Usuario();
+        usuario.setId(request.getId());
+        usuario.setUsername(request.getUsername());
+        usuario.setEmail(request.getEmail());
+        usuario.setNombre(request.getNombre());
+        
         return usuarioRepository.save(usuario);
     }
 
@@ -39,7 +44,7 @@ public class UsuarioService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
     }
 
-    public Usuario actualizar(Long id, UsuarioRequest request) {
+    public Usuario actualizar(Long id, UsuarioRequest request) { // Corregido el parámetro
         Usuario usuario = obtenerPorId(id);
         usuario.setNombre(request.getNombre());
         usuario.setEmail(request.getEmail());
