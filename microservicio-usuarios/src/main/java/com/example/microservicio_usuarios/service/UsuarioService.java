@@ -16,7 +16,7 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public Usuario crear(UsuarioRequest request) { // Corregido el parámetro
+    public Usuario crear(UsuarioRequest request) {
         if (usuarioRepository.existsByEmail(request.getEmail())) {
             throw new IllegalStateException("El email ya está registrado");
         }

@@ -1,6 +1,5 @@
 package com.example.microservicio_usuarios.controller;
 
-
 import com.example.microservicio_usuarios.dto.UsuarioRequest;
 import com.example.microservicio_usuarios.entity.Usuario;
 import com.example.microservicio_usuarios.service.UsuarioService;
@@ -22,7 +21,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<Usuario> crear(@RequestBody SolicitudAmistadResponse request) {
+    public ResponseEntity<Usuario> crear(@RequestBody UsuarioRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.crear(request));
     }
 
@@ -43,7 +42,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @RequestBody SolicitudAmistadResponse request) {
+    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @RequestBody UsuarioRequest request) {
         return ResponseEntity.ok(usuarioService.actualizar(id, request));
     }
 
