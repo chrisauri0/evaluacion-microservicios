@@ -1,6 +1,6 @@
 package com.example.auth_server.config;
 
-import com.example.auth_server.model.Usuario;
+import com.example.auth_server.entity.Usuario;
 import com.example.auth_server.repository.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -23,14 +23,13 @@ public class DataSeeder {
 
                 for (int i = 1; i <= 3; i++) {
                     Usuario usuario = new Usuario();
-                    usuario.setId((long) (i + 1)); // IDs 2, 3, 4
+                    usuario.setId((long) (i + 1));
                     usuario.setUsername("usuario" + i);
                     usuario.setPassword(passwordEncoder.encode("user123"));
                     usuario.setRol("USER");
                     usuarioRepository.save(usuario);
                 }
-
-                System.out.println("✅ Usuarios sembrados: admin (id=1), usuario1 (id=2), usuario2 (id=3), usuario3 (id=4)");
+                System.out.println("Usuarios sembrados: admin (id=1), usuario1 (id=2), usuario2 (id=3), usuario3 (id=4)");
             }
         };
     }

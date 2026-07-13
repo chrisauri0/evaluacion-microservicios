@@ -12,6 +12,11 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
+        - id: auth-server
+          uri: lb://AUTH-SERVER
+          predicates:
+            - Path=/oauth2/**, /login/**
+
         - id: microservicio-posts
           uri: lb://MICROSERVICIO-POSTS
           predicates:
@@ -21,6 +26,7 @@ spring:
           uri: lb://MICROSERVICIO-USUARIOS
           predicates:
             - Path=/api/usuarios/**
+            
         - id: microservicio-comentarios
           uri: lb://MICROSERVICIO-COMENTARIOS
           predicates:
@@ -35,12 +41,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:9000
+          issuer-uri: http://auth-server:9000
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://eureka-server:8761/eureka
     register-with-eureka: true
     fetch-registry: true
   instance:
