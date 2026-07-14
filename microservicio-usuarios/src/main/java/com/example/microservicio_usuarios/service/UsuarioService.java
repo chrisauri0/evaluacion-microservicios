@@ -11,9 +11,11 @@ import java.util.List;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final PerfilUsuarioService perfilUsuarioService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PerfilUsuarioService perfilUsuarioService) {
         this.usuarioRepository = usuarioRepository;
+        this.perfilUsuarioService = perfilUsuarioService;
     }
 
     public Usuario crear(UsuarioRequest request) {
@@ -55,6 +57,7 @@ public class UsuarioService {
         if (!usuarioRepository.existsById(id)) {
             throw new RuntimeException("Usuario no encontrado con id: " + id);
         }
+        perfilUsuarioService.eliminarPerfilPorUsuarioId(id);
         usuarioRepository.deleteById(id);
     }
 }
