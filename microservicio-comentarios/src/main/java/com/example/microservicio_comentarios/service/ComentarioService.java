@@ -28,6 +28,25 @@ public class ComentarioService {
         return toResponse(guardado);
     }
 
+    public List<ComentarioResponse> listarPorUsuario(Long usuarioId) {
+    return comentarioRepository.findByUsuarioId(usuarioId).stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+        }
+
+
+    public ComentarioResponse actualizar(Long id, ComentarioRequest request, Long usuarioIdSolicitante) {
+    Comentario comentario = comentarioRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Comentario no encontrado con id: " + id));
+    
+    if (!comentario.getUsuarioId().equals(usuarioIdSolicitante)) {
+        throw new org.springframework.security.access.AccessDeniedException("No puedes editar comentarios de otro usuario");
+    }
+    
+    comentario.setContenido(request.getContenido());
+    return toResponse(comentarioRepository.save(comentario));
+        }
+
     public List<ComentarioResponse> listarTodos() {
         return comentarioRepository.findAll().stream()
                 .map(arg0 -> toResponse(arg0))
@@ -46,20 +65,17 @@ public class ComentarioService {
                 .collect(Collectors.toList());
     }
 
-    public ComentarioResponse actualizar(Long id, ComentarioRequest request) {
-        Comentario comentario = comentarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Comentario no encontrado con id: " + id));
-        comentario.setContenido(request.getContenido());
-        Comentario actualizado = comentarioRepository.save(comentario);
-        return toResponse(actualizado);
+
+  public void eliminar(Long id, Long usuarioIdSolicitante) {
+    Comentario comentario = comentarioRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Comentario no encontrado con id: " + id));
+
+    if (!comentario.getUsuarioId().equals(usuarioIdSolicitante)) {
+        throw new org.springframework.security.access.AccessDeniedException("No puedes eliminar comentarios de otro usuario");
     }
 
-    public void eliminar(Long id) {
-        if (!comentarioRepository.existsById(id)) {
-            throw new RuntimeException("Comentario no encontrado con id: " + id);
-        }
-        comentarioRepository.deleteById(id);
-    }
+    comentarioRepository.deleteById(id);
+}
 
     private ComentarioResponse toResponse(Comentario c) {
         return new ComentarioResponse(

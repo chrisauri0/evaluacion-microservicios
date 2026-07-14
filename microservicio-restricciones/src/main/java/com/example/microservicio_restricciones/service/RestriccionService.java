@@ -94,12 +94,16 @@ public class RestriccionService {
 
     // ---------- Helpers ----------
 
-    private Long obtenerIdDelAdminActual() {
-        // El JWT trae el "sub" (subject) como identificador del usuario autenticado
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        // Aquí asumimos que el subject del JWT es el ID del admin; ajusta según tu JWT real
-        return Long.parseLong(auth.getName());
+   private Long obtenerIdDelAdminActual() {
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    var jwt = (org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal();
+    
+    Long userId = jwt.getClaim("userId");
+    if (userId == null) {
+        throw new IllegalStateException("El token no contiene el claim 'userId' — ¿usaste client_credentials en vez de un login real?");
     }
+    return userId;
+}
 
     private void notificarAutor(Long autorId, Long postId, String motivo) {
         // TODO: reemplazar con una llamada real a un microservicio de notificaciones

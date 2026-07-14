@@ -7,7 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import java.util.List;
 
 @RestController
@@ -24,6 +25,11 @@ public class ComentarioController {
     public ResponseEntity<ComentarioResponse> crear(@Valid @RequestBody ComentarioRequest request) {
         ComentarioResponse response = comentarioService.crear(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    @GetMapping("/mis-comentarios")
+    public ResponseEntity<List<ComentarioResponse>> misComentarios(@AuthenticationPrincipal Jwt jwt) {
+        Long usuarioId = jwt.getClaim("userId");
+        return ResponseEntity.ok(comentarioService.listarPorUsuario(usuarioId));
     }
 
     @GetMapping
@@ -42,13 +48,15 @@ public class ComentarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ComentarioResponse> actualizar(@PathVariable Long id, @Valid @RequestBody ComentarioRequest request) {
-        return ResponseEntity.ok(comentarioService.actualizar(id, request));
+    public ResponseEntity<ComentarioResponse> actualizar(@PathVariable Long id, @Valid @RequestBody ComentarioRequest request, @AuthenticationPrincipal Jwt jwt) {
+        Long usuarioId = jwt.getClaim("userId");
+        return ResponseEntity.ok(comentarioService.actualizar(id, request, usuarioId));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        comentarioService.eliminar(id);
-        return ResponseEntity.noContent().build();
-    }
+   @DeleteMapping("/{id}")
+        public ResponseEntity<Void> eliminar(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+            Long usuarioId = jwt.getClaim("userId");
+            comentarioService.eliminar(id, usuarioId);
+            return ResponseEntity.noContent().build();
+        }
 }

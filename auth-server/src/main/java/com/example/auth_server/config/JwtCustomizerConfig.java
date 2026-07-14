@@ -1,5 +1,6 @@
 package com.example.auth_server.config;
 
+import com.example.auth_server.repository.UsuarioRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,9 +15,8 @@ import java.util.stream.Collectors;
 public class JwtCustomizerConfig {
 
     @Bean
-    public OAuth2TokenCustomizer<JwtEncodingContext> jwtTokenCustomizer() {
+    public OAuth2TokenCustomizer<JwtEncodingContext> jwtTokenCustomizer(UsuarioRepository usuarioRepository) {
         return context -> {
-            // Validamos que el token sea de tipo ACCESS_TOKEN
             if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
                 var authentication = context.getPrincipal();
 
@@ -26,6 +26,12 @@ public class JwtCustomizerConfig {
                         .collect(Collectors.toList());
 
                 context.getClaims().claim("roles", roles);
+
+                // Agregamos el userId real buscando por username
+                String username = authentication.getName();
+                usuarioRepository.findByUsername(username).ifPresent(usuario -> {
+                    context.getClaims().claim("userId", usuario.getId());
+                });
             }
         };
     }
