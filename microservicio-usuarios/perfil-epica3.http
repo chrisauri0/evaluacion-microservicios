@@ -1,0 +1,46 @@
+### Variables
+@baseUrl = http://localhost:8082
+@tokenUsuario1 = REEMPLAZAR_TOKEN_USUARIO1
+@tokenAdmin = REEMPLAZAR_TOKEN_ADMIN
+@usuarioId = 2
+
+### 1) Obtener perfil (publico/segun privacidad)
+GET {{baseUrl}}/api/usuarios/{{usuarioId}}/perfil
+Authorization: Bearer {{tokenUsuario1}}
+
+### 2) Actualizar perfil (dueno o admin)
+PUT {{baseUrl}}/api/usuarios/{{usuarioId}}/perfil
+Authorization: Bearer {{tokenUsuario1}}
+Content-Type: application/json
+
+{
+  "fotoPerfil": "AVATAR_4",
+  "nombrePerfil": "Valentina Tech",
+  "descripcionPersonal": "Aprendiendo microservicios y scrum",
+  "emailPrivado": true,
+  "nombrePrivado": false
+}
+
+### 3) Ver pendientes de moderacion (solo ADMIN)
+GET {{baseUrl}}/api/usuarios/perfiles/moderacion/pendientes
+Authorization: Bearer {{tokenAdmin}}
+
+### 4) Aprobar perfil (solo ADMIN)
+PATCH {{baseUrl}}/api/usuarios/perfiles/{{usuarioId}}/moderacion
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "aprobado": true,
+  "comentario": "Perfil aprobado"
+}
+
+### 5) Rechazar perfil (solo ADMIN)
+PATCH {{baseUrl}}/api/usuarios/perfiles/{{usuarioId}}/moderacion
+Authorization: Bearer {{tokenAdmin}}
+Content-Type: application/json
+
+{
+  "aprobado": false,
+  "comentario": "Ajustar descripcion"
+}
