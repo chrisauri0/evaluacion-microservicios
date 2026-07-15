@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Service
 public class PostService {
 
@@ -91,4 +94,13 @@ public class PostService {
     private PostResponse toResponse(Post p) {
         return new PostResponse(p.getId(), p.getTitulo(), p.getContenido(), p.getAutorId(), p.getCategoria(), p.getFechaCreacion());
     }
+
+    public List<PostResponse> listarMisPublicaciones(Long usuarioId, String categoria, LocalDate desde, LocalDate hasta) {
+    return postRepository.findByAutorId(usuarioId).stream()
+            .filter(post -> categoria == null || post.getCategoria().equalsIgnoreCase(categoria))
+            .filter(post -> desde == null || !post.getFechaCreacion().toLocalDate().isBefore(desde))
+            .filter(post -> hasta == null || !post.getFechaCreacion().toLocalDate().isAfter(hasta))
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+}
 }

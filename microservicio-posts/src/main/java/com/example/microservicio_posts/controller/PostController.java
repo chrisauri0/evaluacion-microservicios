@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
+
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
@@ -65,4 +68,14 @@ public class PostController {
         postService.eliminar(id, usuarioId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/mis-publicaciones")
+public ResponseEntity<List<PostResponse>> listarMisPublicaciones(
+        @AuthenticationPrincipal Jwt jwt,
+        @RequestParam(required = false) String categoria,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+    Long usuarioId = jwt.getClaim("userId");
+    return ResponseEntity.ok(postService.listarMisPublicaciones(usuarioId, categoria, desde, hasta));
+}
 }
