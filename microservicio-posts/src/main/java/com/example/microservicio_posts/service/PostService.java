@@ -1,9 +1,11 @@
 package com.example.microservicio_posts.service;
 
+import com.example.microservicio_posts.client.ClientFeignUsuarios;
 import com.example.microservicio_posts.dto.PostRequest;
 import com.example.microservicio_posts.dto.PostResponse;
 import com.example.microservicio_posts.model.Post;
 import com.example.microservicio_posts.repository.PostRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +15,11 @@ import java.util.stream.Collectors;
 @Service
 public class PostService {
 
-    private final PostRepository postRepository;
+    @Autowired
+    private PostRepository postRepository;
 
-    public PostService(PostRepository postRepository) {
-        this.postRepository = postRepository;
-    }
+    @Autowired
+    private ClientFeignUsuarios clientFeignUsuarios;
 
     public PostResponse crear(PostRequest request) {
         Post post = new Post(request.getTitulo(), request.getContenido(), request.getAutorId(), request.getCategoria());
@@ -44,6 +46,19 @@ public class PostService {
 
     public List<PostResponse> listarPorCategoria(String categoria) {
         return postRepository.findByCategoria(categoria).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<PostResponse> listarFeedAmigos(Long usuarioId) {
+        List<Long> amigosIds = clientFeignUsuarios.obtenerAmigosIds(usuarioId);
+        
+        if (amigosIds == null || amigosIds.isEmpty()) {
+            return List.of();
+        }
+
+        return postRepository.findAll().stream()
+                .filter(post -> amigosIds.contains(post.getAutorId()))
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }

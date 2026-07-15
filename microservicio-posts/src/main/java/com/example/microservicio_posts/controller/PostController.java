@@ -1,10 +1,10 @@
 package com.example.microservicio_posts.controller;
 
-
 import com.example.microservicio_posts.dto.PostRequest;
 import com.example.microservicio_posts.dto.PostResponse;
 import com.example.microservicio_posts.service.PostService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,11 +17,8 @@ import java.util.List;
 @RequestMapping("/api/posts")
 public class PostController {
 
-    private final PostService postService;
-
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
+    @Autowired
+    private PostService postService;
 
     @PostMapping
     public ResponseEntity<PostResponse> crear(@Valid @RequestBody PostRequest request) {
@@ -48,9 +45,16 @@ public class PostController {
         return ResponseEntity.ok(postService.listarPorCategoria(categoria));
     }
 
+    @GetMapping("/feed")
+    public ResponseEntity<List<PostResponse>> obtenerFeedAmigos(@AuthenticationPrincipal Jwt jwt) {
+        Long usuarioId = jwt.getClaim("userId");
+        List<PostResponse> feed = postService.listarFeedAmigos(usuarioId);
+        return ResponseEntity.ok(feed);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<PostResponse> actualizar(@PathVariable Long id, @Valid @RequestBody PostRequest request,
-                                                     @AuthenticationPrincipal Jwt jwt) {
+        @AuthenticationPrincipal Jwt jwt) {
         Long usuarioId = jwt.getClaim("userId");
         return ResponseEntity.ok(postService.actualizar(id, request, usuarioId));
     }
