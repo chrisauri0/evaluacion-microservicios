@@ -28,34 +28,37 @@ import java.util.UUID;
 public class AuthorizationServerConfig {
 
     @Bean
-    @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+@Order(1)
+public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+    OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .oidc(oidc -> {});
+    http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+            .oidc(oidc -> {});
 
-        http.exceptionHandling(exceptions -> exceptions
-                .defaultAuthenticationEntryPointFor(
-                        new org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint("/login"),
-                        new org.springframework.security.web.util.matcher.MediaTypeRequestMatcher(org.springframework.http.MediaType.TEXT_HTML)
-                )
-        );
+    http.cors(org.springframework.security.config.Customizer.withDefaults()); // <-- agregar esto
 
-        return http.build();
-    }
+    http.exceptionHandling(exceptions -> exceptions
+            .defaultAuthenticationEntryPointFor(
+                    new org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint("/login"),
+                    new org.springframework.security.web.util.matcher.MediaTypeRequestMatcher(org.springframework.http.MediaType.TEXT_HTML)
+            )
+    );
 
-    @Bean
-    @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().authenticated()
-                )
-                .formLogin(org.springframework.security.config.Customizer.withDefaults());
+    return http.build();
+}
 
-        return http.build();
-    }
+@Bean
+@Order(2)
+public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    http
+            .cors(org.springframework.security.config.Customizer.withDefaults()) // <-- agregar esto también
+            .authorizeHttpRequests(authorize -> authorize
+                    .anyRequest().authenticated()
+            )
+            .formLogin(org.springframework.security.config.Customizer.withDefaults());
+
+    return http.build();
+}
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -69,8 +72,8 @@ public class AuthorizationServerConfig {
     public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("angular-client")
-                .clientSecret("{noop}angular-secret")
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                  // sin clientSecret, ya no aplica para clientes públicos
+        .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)

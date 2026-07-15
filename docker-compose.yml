@@ -141,7 +141,17 @@ services:
     networks:
       - micro-net
 
-  
+
+  angular-frontend:
+    build: ./AngularBlogosoFront
+    container_name: angular-frontend
+    depends_on:
+      api-gateway:
+        condition: service_started
+    ports:
+      - "4200:80"
+    networks:
+      - micro-net
 
 networks:
   micro-net:
