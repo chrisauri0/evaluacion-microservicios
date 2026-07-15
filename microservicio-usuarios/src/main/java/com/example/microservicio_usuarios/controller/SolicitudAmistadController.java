@@ -31,4 +31,9 @@ public class SolicitudAmistadController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/amigos/{userId}")
+    public ResponseEntity<List<Long>> obtenerIdsDeAmigos(@PathVariable Long userId) {
+        return ResponseEntity.ok(service.obtenerAmigosIds(userId));
+    }
 }

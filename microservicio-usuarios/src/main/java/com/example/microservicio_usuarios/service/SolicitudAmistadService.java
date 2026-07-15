@@ -22,6 +22,15 @@ public class SolicitudAmistadService {
 
     @Transactional
     public SolicitudAmistadDto create(SolicitudAmistadDto dto) {
+        boolean existe = repository.findAll().stream()
+            .anyMatch(s -> s.getEmisor().getId().equals(dto.getEmisorId()) 
+                        && s.getReceptor().getId().equals(dto.getReceptorId())
+                        && s.getEstado() == EstadoSolicitud.PENDIENTE);
+        
+        if (existe) {
+            throw new IllegalStateException("Ya existe una solicitud pendiente entre estos usuarios");
+        }
+
         SolicitudAmistad entity = toEntity(dto);
         return toDto(repository.save(entity));
     }
@@ -29,7 +38,7 @@ public class SolicitudAmistadService {
     @Transactional(readOnly = true)
     public List<SolicitudAmistadDto> findByReceptor(Long receptorId) {
         return repository.findAll().stream()
-            .filter(s -> s.getReceptor().getId().equals(receptorId))
+            .filter(s -> s.getReceptor().getId().equals(receptorId) && s.getEstado() == EstadoSolicitud.PENDIENTE)
             .map(this::toDto)
             .collect(Collectors.toList());
     }
@@ -42,6 +51,16 @@ public class SolicitudAmistadService {
         });
     }
 
+    @Transactional(readOnly = true)
+    public List<Long> obtenerAmigosIds(Long userId) {
+        return repository.findAll().stream()
+            .filter(s -> s.getEstado() == EstadoSolicitud.ACEPTADA)
+            .filter(s -> s.getEmisor().getId().equals(userId) || s.getReceptor().getId().equals(userId))
+            .map(s -> s.getEmisor().getId().equals(userId) ? s.getReceptor().getId() : s.getEmisor().getId())
+            .collect(Collectors.toList());
+    }
+
+    // Converters
     private SolicitudAmistadDto toDto(SolicitudAmistad e) {
         SolicitudAmistadDto d = new SolicitudAmistadDto();
         d.setId(e.getId());
