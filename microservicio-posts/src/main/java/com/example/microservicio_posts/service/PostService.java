@@ -1,19 +1,18 @@
 package com.example.microservicio_posts.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+
 import com.example.microservicio_posts.client.ClientFeignUsuarios;
 import com.example.microservicio_posts.dto.PostRequest;
 import com.example.microservicio_posts.dto.PostResponse;
 import com.example.microservicio_posts.model.Post;
 import com.example.microservicio_posts.repository.PostRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Service
 public class PostService {
@@ -104,3 +103,5 @@ public class PostService {
             .collect(Collectors.toList());
 }
 }
+
+//perras
