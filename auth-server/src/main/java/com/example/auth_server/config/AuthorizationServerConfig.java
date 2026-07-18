@@ -35,7 +35,7 @@ public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity h
     http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
             .oidc(oidc -> {});
 
-    http.cors(org.springframework.security.config.Customizer.withDefaults()); // <-- agregar esto
+    http.cors(org.springframework.security.config.Customizer.withDefaults());
 
     http.exceptionHandling(exceptions -> exceptions
             .defaultAuthenticationEntryPointFor(
@@ -101,7 +101,7 @@ public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
-                .issuer("http://auth-server:9000")
+                .issuer("http://localhost:9000")
                 .build();
     }
 }
