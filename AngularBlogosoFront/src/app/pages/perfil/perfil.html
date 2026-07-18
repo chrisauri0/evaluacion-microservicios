@@ -1,0 +1,47 @@
+<h1 class="text-2xl font-bold text-gray-900 mb-1">Tu perfil</h1>
+<p class="text-gray-500 mb-6">Personaliza tu avatar y tu información. Los cambios se guardan al instante.</p>
+
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 max-w-2xl">
+  <div class="flex items-center gap-4 mb-6">
+    <div class="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-3xl">
+      {{ profile().avatar }}
+    </div>
+    <p class="text-lg font-bold text-gray-900">{{ profile().name }}</p>
+  </div>
+
+  <label class="block text-xs font-semibold text-gray-500 tracking-wide mb-2">ELIGE TU AVATAR</label>
+  <div class="flex gap-3 mb-6">
+    @for (avatar of avatars; track avatar) {
+      <button
+        (click)="onAvatarSelect(avatar)"
+        class="w-12 h-12 rounded-full flex items-center justify-center text-xl border-2 transition-colors"
+        [class.border-orange-500]="profile().avatar === avatar"
+        [class.bg-orange-50]="profile().avatar === avatar"
+        [class.border-transparent]="profile().avatar !== avatar"
+        [class.bg-gray-50]="profile().avatar !== avatar"
+      >
+        {{ avatar }}
+      </button>
+    }
+  </div>
+
+  <label class="block text-xs font-semibold text-gray-500 tracking-wide mb-2">NOMBRE</label>
+  <input
+    type="text"
+    [ngModel]="profile().name"
+    (ngModelChange)="onNameChange($event)"
+    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+  />
+
+  <label class="block text-xs font-semibold text-gray-500 tracking-wide mb-2">BIO</label>
+  <textarea
+    rows="3"
+    [ngModel]="profile().bio"
+    (ngModelChange)="onBioChange($event)"
+    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-400"
+  ></textarea>
+
+  @if (savedIndicator()) {
+    <p class="text-xs text-green-600 mt-4">✓ Cambios guardados automáticamente</p>
+  }
+</div>

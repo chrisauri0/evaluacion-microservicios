@@ -1,0 +1,86 @@
+<h1 class="text-2xl font-bold text-gray-900 mb-1">Tablón</h1>
+<p class="text-gray-500 mb-6">Publicaciones de la comunidad, moderadas activamente.</p>
+
+
+<button class="bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors" (click)="login()">Login</button>
+    <div *ngIf="authService.isLoggedIn">
+      <p>¡Logueado!</p>
+      <pre>{{ authService.identityClaims | json }}</pre>
+      <p>Roles: {{ getRoles() }}</p>
+    </div>
+
+
+    <button class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors" (click)="probarPosts()">Probar GET Posts</button>
+<button class="bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors" (click)="probarComentarios()">Probar GET Comentarios</button>
+
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-6">
+  <textarea
+    [ngModel]="newContent()"
+    (ngModelChange)="newContent.set($event)"
+    placeholder="¿Qué quieres compartir?"
+    rows="3"
+    class="w-full resize-none border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+  ></textarea>
+
+  <div class="flex items-center justify-between mt-3">
+    <select
+      [ngModel]="newCategory()"
+      (ngModelChange)="newCategory.set($event)"
+      class="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700"
+    >
+      @for (cat of categories; track cat) {
+        <option [value]="cat">{{ cat }}</option>
+      }
+    </select>
+
+    <button
+      (click)="publish()"
+      class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors"
+    >
+      Publicar
+    </button>
+  </div>
+</div>
+
+<div class="flex items-center gap-2 mb-4 flex-wrap">
+  <button
+    (click)="activeTab.set('todos')"
+    [class.bg-orange-500]="activeTab() === 'todos'"
+    [class.text-white]="activeTab() === 'todos'"
+    class="px-4 py-1.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-700"
+  >
+    Todos
+  </button>
+  <button
+    (click)="activeTab.set('amigos')"
+    [class.bg-orange-500]="activeTab() === 'amigos'"
+    [class.text-white]="activeTab() === 'amigos'"
+    class="px-4 py-1.5 rounded-lg text-sm font-medium border border-gray-200 text-gray-700"
+  >
+    Amigos
+  </button>
+
+  <select
+    [ngModel]="categoryFilter()"
+    (ngModelChange)="categoryFilter.set($event)"
+    class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700"
+  >
+    <option value="todas">Todas las categorías</option>
+    @for (cat of categories; track cat) {
+      <option [value]="cat">{{ cat }}</option>
+    }
+  </select>
+</div>
+
+<div class="flex flex-col gap-4">
+  @for (post of filteredPosts(); track post.id) {
+    <app-post-card
+      [post]="post"
+      (like)="onLike($event)"
+      (report)="onReport($event)"
+      (addComment)="onAddComment($event)"
+    />
+  } @empty {
+    <p class="text-gray-400 text-sm">No hay publicaciones que coincidan con el filtro.</p>
+  }
+</div>
