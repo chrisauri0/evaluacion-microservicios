@@ -44,4 +44,9 @@ export class AuthService {
     const payload = token.split('.')[1];
     return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
   }
+  getRole(): any {
+    const claims = this.accessTokenClaims;
+    if (!claims) return null;
+    return claims.roles || null; 
+  }
 }

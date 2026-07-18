@@ -1,0 +1,91 @@
+<div class="admin-panel-container">
+  <header class="admin-header">
+    <h2>Gestión de Publicaciones</h2>
+    <button class="btn btn-primary" (click)="abrirModalCrear()">+ Crear Publicación</button>
+  </header>
+
+  @if (isLoading()) {
+    <div class="loading-spinner">Cargando datos del microservicio...</div>
+  } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Autor</th>
+          <th>Contenido</th>
+          <th>Categoría</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (post of posts(); track post.id) {
+          <tr>
+            <td>
+              <div class="author-info">
+                <img [src]="post.authorAvatar" alt="Avatar" class="avatar-sm">
+                <span>{{ post.authorName }}</span>
+              </div>
+            </td>
+            <!-- Mostramos solo los primeros 40 caracteres del contenido -->
+            <td>{{ post.content | slice:0:40 }}...</td>
+            <td><span class="category-tag">{{ post.category }}</span></td>
+            <td>
+              <!-- Aplicamos una clase CSS dinámica según el status -->
+              <span class="status-badge" [ngClass]="post.status">
+                {{ post.status }}
+              </span>
+            </td>
+            <td class="actions">
+              <!-- Pendiente conectar estas funciones -->
+              <button class="btn btn-edit">Editar</button>
+              <button class="btn btn-danger" (click)="eliminarPost(post.id)">Borrar</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="empty-state">No hay publicaciones registradas.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+<!-- MODAL -->
+  @if (isModalOpen()) {
+    <div class="modal-overlay" (click)="cerrarModal()">
+      <!-- Detenemos la propagación para que al dar clic en la caja no se cierre el modal -->
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <h3>{{ isEditing() ? 'Editar Publicación' : 'Nueva Publicación' }}</h3>
+          <button class="btn-close" (click)="cerrarModal()">×</button>
+        </header>
+
+        <form [formGroup]="postForm" (ngSubmit)="guardarPost()">
+          
+          <div class="form-group">
+            <label for="category">Categoría</label>
+            <select id="category" formControlName="category" class="form-control">
+              <option value="Anuncios">Anuncios</option>
+              <option value="General">General</option>
+              <option value="Preguntas">Preguntas</option>
+              <option value="Humor">Humor</option>
+              <option value="Noticias">Noticias</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="content">Contenido</label>
+            <textarea id="content" formControlName="content" class="form-control" rows="5" placeholder="Escribe lo que estás pensando..."></textarea>
+          </div>
+
+          <footer class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="postForm.invalid">
+              {{ isEditing() ? 'Actualizar' : 'Publicar' }}
+            </button>
+          </footer>
+        </form>
+      </div>
+    </div>
+  }
+</div> <!-- Cierre del admin-panel-container -->
