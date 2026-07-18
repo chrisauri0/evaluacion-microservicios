@@ -1,26 +1,39 @@
-import { Injectable, signal } from '@angular/core';
-import { Profile } from '../../models/perfil/perfil-model';
-
-const DEFAULT_PROFILE: Profile = {
-  name: 'Tú',
-  bio: 'Explorando por aquí 👋',
-  avatar: '🦊',
-};
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import {
+  ModeracionPerfilRequest,
+  PerfilUsuarioResponse,
+  PerfilUsuarioUpdateRequest,
+} from '../../models/perfil/perfil-model';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
-  private readonly _profile = signal<Profile>(DEFAULT_PROFILE);
-  profile = this._profile.asReadonly();
+  private http = inject(HttpClient);
+  private gatewayUrl = 'http://localhost:8080/api/usuarios';
 
-  updateName(name: string): void {
-    this._profile.update((p) => ({ ...p, name }));
+  obtenerPerfil(usuarioId: number): Observable<PerfilUsuarioResponse> {
+    return this.http.get<PerfilUsuarioResponse>(`${this.gatewayUrl}/${usuarioId}/perfil`);
   }
 
-  updateBio(bio: string): void {
-    this._profile.update((p) => ({ ...p, bio }));
+  actualizarPerfil(
+    usuarioId: number,
+    request: PerfilUsuarioUpdateRequest,
+  ): Observable<PerfilUsuarioResponse> {
+    return this.http.put<PerfilUsuarioResponse>(`${this.gatewayUrl}/${usuarioId}/perfil`, request);
   }
 
-  updateAvatar(avatar: string): void {
-    this._profile.update((p) => ({ ...p, avatar }));
+  listarPendientesModeracion(): Observable<PerfilUsuarioResponse[]> {
+    return this.http.get<PerfilUsuarioResponse[]>(`${this.gatewayUrl}/perfiles/moderacion/pendientes`);
+  }
+
+  moderarPerfil(
+    usuarioId: number,
+    request: ModeracionPerfilRequest,
+  ): Observable<PerfilUsuarioResponse> {
+    return this.http.patch<PerfilUsuarioResponse>(
+      `${this.gatewayUrl}/perfiles/${usuarioId}/moderacion`,
+      request,
+    );
   }
 }

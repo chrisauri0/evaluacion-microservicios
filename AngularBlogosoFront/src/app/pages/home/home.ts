@@ -82,8 +82,8 @@ probarComentarios() {
 }
 
  getRoles(): string {
-  const claims = this.authService.accessTokenClaims;
-  return claims?.roles?.join(', ') ?? 'sin roles';
+  const roles = this.authService.getRole();
+  return Array.isArray(roles) ? roles.join(', ') : 'sin roles';
 }
 
   publish(): void {
