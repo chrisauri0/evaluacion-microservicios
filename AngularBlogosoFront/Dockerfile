@@ -1,8 +1,8 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 RUN npm install -g pnpm
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile --prod=false
 COPY . .
 RUN pnpm run build
 
