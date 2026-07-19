@@ -28,3 +28,13 @@ export interface NewPost {
   content: string;
   category: PostCategory;
 }
+
+
+export interface PostBackend {
+  id: number;
+  titulo: string;
+  contenido: string;
+  autorId: number;
+  categoria: string;
+  fechaCreacion: string; 
+}

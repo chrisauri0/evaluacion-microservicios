@@ -1,16 +1,18 @@
 package com.example.microservicio_posts.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+
 import com.example.microservicio_posts.client.ClientFeignUsuarios;
 import com.example.microservicio_posts.dto.PostRequest;
 import com.example.microservicio_posts.dto.PostResponse;
 import com.example.microservicio_posts.model.Post;
 import com.example.microservicio_posts.repository.PostRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -91,4 +93,15 @@ public class PostService {
     private PostResponse toResponse(Post p) {
         return new PostResponse(p.getId(), p.getTitulo(), p.getContenido(), p.getAutorId(), p.getCategoria(), p.getFechaCreacion());
     }
+
+    public List<PostResponse> listarMisPublicaciones(Long usuarioId, String categoria, LocalDate desde, LocalDate hasta) {
+    return postRepository.findByAutorId(usuarioId).stream()
+            .filter(post -> categoria == null || post.getCategoria().equalsIgnoreCase(categoria))
+            .filter(post -> desde == null || !post.getFechaCreacion().toLocalDate().isBefore(desde))
+            .filter(post -> hasta == null || !post.getFechaCreacion().toLocalDate().isAfter(hasta))
+            .map(this::toResponse)
+            .collect(Collectors.toList());
 }
+}
+
+//perras
