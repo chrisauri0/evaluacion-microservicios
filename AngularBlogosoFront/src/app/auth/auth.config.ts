@@ -1,7 +1,7 @@
 import { AuthConfig } from 'angular-oauth2-oidc';
 
 export const authConfig: AuthConfig = {
-  issuer: 'http://auth-server:9000',
+  issuer: 'http://localhost:9000',
   redirectUri: window.location.origin + '/callback',
   postLogoutRedirectUri: window.location.origin + '/logout',
   clientId: 'angular-client',
