@@ -106,6 +106,10 @@ probarComentarios() {
   }
 
   onAddComment(event: { postId: string; content: string }): void {
-  this.postService.addComment(event.postId, event.content, { name: 'Tú', avatar: '🦊' });
-}
+    this.postService.addComment(event.postId, event.content);
+  }
+
+  onOpenComments(postId: string): void {
+    this.postService.loadComments(postId);
+  }
 }

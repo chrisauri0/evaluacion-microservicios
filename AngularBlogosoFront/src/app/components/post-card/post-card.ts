@@ -14,12 +14,17 @@ export class PostCardComponent {
   like = output<string>();
   report = output<string>();
   addComment = output<{ postId: string; content: string }>();
+  openComments = output<string>();
 
   showComments = signal(false);
   newComment = signal('');
 
   toggleComments(): void {
-    this.showComments.update((v) => !v);
+    const willOpen = !this.showComments();
+    this.showComments.set(willOpen);
+    if (willOpen) {
+      this.openComments.emit(this.post().id);
+    }
   }
 
   submitComment(): void {
