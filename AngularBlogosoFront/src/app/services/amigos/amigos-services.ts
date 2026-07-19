@@ -1,40 +1,37 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { User } from '../../models/amigos/amigos-model';
-
-const ALL_USERS: User[] = [
-  { id: 'u1', name: 'Ana Ríos', avatar: '🐼' },
-  { id: 'u2', name: 'Carlos Lima', avatar: '🦁' },
-  { id: 'u3', name: 'Marta Ibáñez', avatar: '🐹' },
-  { id: 'u4', name: 'Diego Soto', avatar: '🐸' },
-];
+import { inject, Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { SolicitudAmistadDto } from '../../models/amigos/amigos-model';
 
 @Injectable({ providedIn: 'root' })
-export class FriendService {
-  private readonly _friendIds = signal<Set<string>>(new Set(['u2']));
+export class AmigosService {
+  private http = inject(HttpClient);
+  
+  private gatewaySolicitudesUrl = 'http://localhost:8080/api/usuarios/solicitudes';
+  private gatewayUsuariosUrl = 'http://localhost:8080/api/usuarios';
 
-  allUsers = signal<User[]>(ALL_USERS);
-
-  friends = computed(() =>
-    this.allUsers().filter((u) => this._friendIds().has(u.id))
-  );
-
-  others = computed(() =>
-    this.allUsers().filter((u) => !this._friendIds().has(u.id))
-  );
-
-  isFriend(userId: string): boolean {
-    return this._friendIds().has(userId);
+  enviar(dto: SolicitudAmistadDto): Observable<SolicitudAmistadDto> {
+    return this.http.post<SolicitudAmistadDto>(this.gatewaySolicitudesUrl, dto);
   }
 
-  add(userId: string): void {
-    this._friendIds.update((ids) => new Set(ids).add(userId));
+  listarPendientes(receptorId: number): Observable<SolicitudAmistadDto[]> {
+    return this.http.get<SolicitudAmistadDto[]>(`${this.gatewaySolicitudesUrl}/pendientes/${receptorId}`);
   }
 
-  remove(userId: string): void {
-    this._friendIds.update((ids) => {
-      const next = new Set(ids);
-      next.delete(userId);
-      return next;
-    });
+  actualizarEstado(id: number, estado: string): Observable<SolicitudAmistadDto> {
+    const params = new HttpParams().set('estado', estado);
+    return this.http.put<SolicitudAmistadDto>(`${this.gatewaySolicitudesUrl}/${id}/estado`, null, { params });
+  }
+
+  obtenerUsuarioPorId(id: number): Observable<any> {
+    return this.http.get<any>(`${this.gatewayUsuariosUrl}/${id}`);
+  }
+
+  obtenerIdsDeAmigos(userId: number): Observable<number[]> {
+    return this.http.get<number[]>(`${this.gatewaySolicitudesUrl}/amigos/${userId}`);
+  }
+
+  buscarPorUsername(username: string): Observable<any> {
+    return this.http.get<any>(`${this.gatewayUsuariosUrl}/username/${username}`);
   }
 }

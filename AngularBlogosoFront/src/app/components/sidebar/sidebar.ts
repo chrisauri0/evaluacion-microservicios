@@ -1,4 +1,5 @@
-import { Component, input } from '@angular/core';
+import { Component, input, inject } from '@angular/core';
+import { AuthService } from '../../auth/auth.service';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 interface NavItem {
@@ -13,7 +14,13 @@ interface NavItem {
   templateUrl: './sidebar.html',
 })
 export class SidebarComponent {
+  authService = inject(AuthService);
+
   pendingCount = input<number>(0);
+
+  cerrarSesion() {
+    this.authService.logout();
+  }
 
   navItems: NavItem[] = [
     { label: 'Home', path: '/home' },
