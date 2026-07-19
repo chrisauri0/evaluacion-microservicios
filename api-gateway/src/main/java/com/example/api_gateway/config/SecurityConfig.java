@@ -14,7 +14,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import java.util.List;
 
 @Configuration
-@EnableWebFluxSecurity // Usamos la versión reactiva para el Gateway
+@EnableWebFluxSecurity
 public class SecurityConfig {
 
     @Bean
@@ -40,7 +40,6 @@ public class SecurityConfig {
                 .pathMatchers("/oauth2/**", "/login/**").permitAll()
                  .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll() // <-- clave
                 .anyExchange().authenticated()
-                
             )
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(Customizer.withDefaults())
