@@ -22,10 +22,20 @@ export class SidebarComponent {
     this.authService.logout();
   }
 
+  get isAdmin(): boolean {
+    const roles = this.authService.getRole();
+    return roles ? roles.includes('ADMIN') : false;
+  }
+
   navItems: NavItem[] = [
     { label: 'Home', path: '/home' },
     { label: 'Perfil', path: '/perfil' },
     { label: 'Mi historial', path: '/historial' },
     { label: 'Amigos', path: '/amigos' },
+  ];
+
+  adminNavItems: NavItem[] = [
+    { label: 'Gestión de Publicaciones', path: '/admin/posts' },
+    { label: 'Gestión de Usuarios', path: '/admin/users' },
   ];
 }

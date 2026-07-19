@@ -1,0 +1,101 @@
+<div class="admin-panel-container">
+  <header class="admin-header">
+    <h2>Gestión de Usuarios</h2>
+    <button class="btn btn-primary" (click)="abrirModalCrear()">+ Crear Usuario</button>
+  </header>
+
+  @if (isLoading()) {
+    <div class="loading-spinner">Cargando datos del microservicio...</div>
+  } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Usuario</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of users(); track user.id) {
+          <tr>
+            <td>{{ user.id }}</td>
+            <td>
+              <div class="author-info">
+                <img [src]="user.avatarUrl || 'assets/default-avatar.png'" alt="Avatar" class="avatar-sm">
+                <span>{{ user.username }}</span>
+              </div>
+            </td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="{'approved': user.rol === 'ADMIN', 'pending': user.rol === 'USER'}">
+                {{ user.rol }}
+              </span>
+            </td>
+            <td class="actions">
+              <button class="btn btn-edit" (click)="abrirModalEditar(user)">Editar</button>
+              <button class="btn btn-danger" (click)="eliminarUsuario(user.id)">Borrar</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="empty-state">No hay usuarios registrados.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  <!-- MODAL -->
+  @if (isModalOpen()) {
+    <div class="modal-overlay" (click)="cerrarModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <h3>{{ isEditing() ? 'Editar Usuario' : 'Nuevo Usuario' }}</h3>
+          <button class="btn-close" (click)="cerrarModal()">×</button>
+        </header>
+
+        <form [formGroup]="userForm" (ngSubmit)="guardarUsuario()">
+          
+          <div class="form-group">
+            <label for="username">Nombre de Usuario (Username)</label>
+            <input type="text" id="username" formControlName="username" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="nombre">Nombre Completo</label>
+            <input type="text" id="nombre" formControlName="nombre" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <input type="email" id="email" formControlName="email" class="form-control">
+          </div>
+
+          @if (!isEditing()) {
+            <div class="form-group">
+              <label for="password">Contraseña temporal</label>
+              <input type="password" id="password" formControlName="password" class="form-control">
+            </div>
+          }
+
+          <div class="form-group">
+            <label for="rol">Rol del Sistema</label>
+            <select id="rol" formControlName="rol" class="form-control">
+              <option value="ROLE_USER">Usuario Estándar</option>
+              <option value="ROLE_ADMIN">Administrador</option>
+            </select>
+          </div>
+
+          <footer class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="userForm.invalid">
+              {{ isEditing() ? 'Actualizar' : 'Guardar' }}
+            </button>
+          </footer>
+        </form>
+      </div>
+    </div>
+  }
+</div>
