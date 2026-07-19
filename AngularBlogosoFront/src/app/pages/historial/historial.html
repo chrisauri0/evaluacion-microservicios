@@ -1,23 +1,61 @@
 <h1 class="text-2xl font-bold text-gray-900 mb-1">Mi historial</h1>
 <p class="text-gray-500 mb-6">Todas tus publicaciones.</p>
 
-<div class="flex flex-col gap-4">
-  @for (post of myPosts(); track post.id) {
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex items-center justify-between">
-      <div>
-        <p class="text-xs text-gray-400 mb-1">{{ post.category }}</p>
-        <p class="text-gray-800 text-sm mb-2">{{ post.content }}</p>
-        <p class="text-xs text-gray-500">👍 {{ post.likes }} · 💬 {{ post.comments.length }}</p>
-      </div>
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-6 flex items-end gap-3 flex-wrap">
+  <div>
+    <label class="block text-xs font-semibold text-gray-500 mb-1">Categoría</label>
+    <select
+      [ngModel]="categoryFilter()"
+      (ngModelChange)="categoryFilter.set($event)"
+      class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700"
+    >
+      <option value="todas">Todas</option>
+      @for (cat of categories; track cat) {
+        <option [value]="cat">{{ cat }}</option>
+      }
+    </select>
+  </div>
 
-      <button
-        (click)="onDelete(post.id)"
-        class="text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 rounded-lg shrink-0 ml-4"
-      >
-        Eliminar
-      </button>
-    </div>
-  } @empty {
-    <p class="text-gray-400 text-sm">Todavía no tienes publicaciones.</p>
-  }
+  <div>
+    <label class="block text-xs font-semibold text-gray-500 mb-1">Desde</label>
+    <input type="date" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event)"
+      class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700" />
+  </div>
+
+  <div>
+    <label class="block text-xs font-semibold text-gray-500 mb-1">Hasta</label>
+    <input type="date" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event)"
+      class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700" />
+  </div>
+
+  <button (click)="clearFilters()" class="text-xs font-medium text-gray-600 hover:text-gray-800 px-3 py-1.5">
+    Limpiar filtros
+  </button>
 </div>
+
+@if (isLoading()) {
+  <p class="text-gray-400 text-sm">Cargando tus publicaciones...</p>
+} @else if (errorMsg()) {
+  <p class="text-red-500 text-sm">{{ errorMsg() }}</p>
+} @else {
+  <div class="flex flex-col gap-4">
+    @for (post of posts(); track post.id) {
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex items-center justify-between">
+        <div>
+          <p class="text-xs text-gray-400 mb-1">{{ post.categoria }} · {{ post.fechaCreacion | date: 'dd/MM/yyyy' }}</p>
+          <p class="font-semibold text-gray-900 text-sm mb-1">{{ post.titulo }}</p>
+          <p class="text-gray-800 text-sm">{{ post.contenido }}</p>
+        </div>
+
+        <button
+          (click)="onDelete(post.id)"
+          class="text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 rounded-lg shrink-0 ml-4"
+        >
+          Eliminar
+        </button>
+      </div>
+    } @empty {
+      <p class="text-gray-400 text-sm">Todavía no tienes publicaciones.</p>
+    }
+  </div>
+}
