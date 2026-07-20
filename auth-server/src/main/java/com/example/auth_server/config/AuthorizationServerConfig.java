@@ -28,16 +28,16 @@ import java.util.UUID;
 public class AuthorizationServerConfig {
 
     @Bean
-@Order(1)
-public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-    OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+    @Order(1)
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 
-    http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
             .oidc(oidc -> {});
 
-    http.cors(org.springframework.security.config.Customizer.withDefaults());
+        http.cors(org.springframework.security.config.Customizer.withDefaults());
 
-    http.exceptionHandling(exceptions -> exceptions
+        http.exceptionHandling(exceptions -> exceptions
             .defaultAuthenticationEntryPointFor(
                     new org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint("/login"),
                     new org.springframework.security.web.util.matcher.MediaTypeRequestMatcher(org.springframework.http.MediaType.TEXT_HTML)
@@ -45,28 +45,27 @@ public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity h
     );
 
     return http.build();
-}
+    }
 
-@Bean
-@Order(2)
-public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-    http
-            .cors(org.springframework.security.config.Customizer.withDefaults()) // <-- agregar esto también
+        @Bean
+        @Order(2)
+        public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+            http
+            .cors(org.springframework.security.config.Customizer.withDefaults())
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/auth-internal/**"))
             .authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers("/api/auth-internal/**").permitAll()
                     .anyRequest().authenticated()
             )
             .formLogin(org.springframework.security.config.Customizer.withDefaults());
 
-    return http.build();
-}
+        return http.build();
+        }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
-
-    // NOTA: no declaramos UserDetailsService aquí.
-    // CustomUserDetailsService (con @Service) ya lo provee, leyendo de MySQL.
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
