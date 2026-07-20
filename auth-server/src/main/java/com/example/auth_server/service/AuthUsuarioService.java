@@ -8,6 +8,9 @@ import com.example.auth_server.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -51,6 +54,39 @@ public class AuthUsuarioService {
         usuariosClient.crearUsuarioProfile(profileRequest);
 
         return authUser;
+    }
+
+    @Transactional
+    public Usuario actualizar(Long id, RegistroRequest request) {
+        Usuario authUser = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con id: " + id));
+
+        if (request.getUsername() != null && !request.getUsername().isBlank()) {
+            authUser.setUsername(request.getUsername());
+        }
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+            authUser.setEmail(request.getEmail());
+        }
+        if (request.getNombre() != null && !request.getNombre().isBlank()) {
+            authUser.setNombre(request.getNombre());
+        }
+        if (request.getRol() != null && !request.getRol().isBlank()) {
+            authUser.setRol(request.getRol());
+        }
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            authUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        Usuario actualizado = usuarioRepository.save(authUser);
+
+        UsuarioProfileRequest profileRequest = new UsuarioProfileRequest();
+        profileRequest.setId(actualizado.getId());
+        profileRequest.setUsername(actualizado.getUsername());
+        profileRequest.setEmail(actualizado.getEmail());
+        profileRequest.setNombre(actualizado.getNombre());
+        usuariosClient.actualizarUsuarioProfile(actualizado.getId(), profileRequest);
+
+        return actualizado;
     }
 
     @Transactional

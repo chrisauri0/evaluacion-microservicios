@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesion | Blogoso</title>
+  <style>
+    :root {
+      --bg-1: #f8f4ea;
+      --bg-2: #fce6c9;
+      --card: #fffdfa;
+      --ink: #2f2418;
+      --muted: #7c6a56;
+      --brand: #ea7a2a;
+      --brand-2: #cf6418;
+      --ring: rgba(234, 122, 42, 0.25);
+      --line: #eadfce;
+      --danger: #b13030;
+      --ok: #256e3f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 20%, var(--bg-2) 0%, transparent 38%),
+        radial-gradient(circle at 85% 80%, #ffe9d6 0%, transparent 35%),
+        linear-gradient(160deg, var(--bg-1), #fff9f1);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .card {
+      width: min(460px, 96vw);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 14px 32px rgba(74, 44, 16, 0.12);
+      padding: 26px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      background: #fff1e3;
+      border: 1px solid #ffd5b0;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    form {
+      margin-top: 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      display: grid;
+      gap: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+      background: #fffcf8;
+    }
+
+    input:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 5px var(--ring);
+    }
+
+    button {
+      margin-top: 2px;
+      border: 0;
+      border-radius: 10px;
+      background: linear-gradient(180deg, var(--brand), var(--brand-2));
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform .08s ease, opacity .2s ease;
+    }
+
+    button:active { transform: translateY(1px); }
+    button:hover { opacity: .94; }
+
+    .notice {
+      margin-top: 16px;
+      padding: 10px 12px;
+      border-radius: 9px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .notice.error { background: #ffeaea; color: var(--danger); border: 1px solid #ffd3d3; }
+    .notice.ok { background: #eaf7ef; color: var(--ok); border: 1px solid #cdebd9; }
+
+    .hint {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      border-top: 1px dashed var(--line);
+      padding-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <main class="card" aria-labelledby="login-title">
+    <div class="logo" aria-hidden="true">B</div>
+    <h1 id="login-title">Accede a Blogoso</h1>
+    <p>Inicia sesion para continuar al panel.</p>
+
+    <div id="error-box" class="notice error" role="alert">Credenciales invalidas. Intenta de nuevo.</div>
+    <div id="logout-box" class="notice ok" role="status">Sesion cerrada correctamente.</div>
+
+    <form action="/login" method="post">
+      <label>
+        Usuario
+        <input type="text" name="username" autocomplete="username" required>
+      </label>
+
+      <label>
+        Contrasena
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+
+      <button type="submit">Entrar</button>
+    </form>
+
+    <div class="hint">Tip de demo: admin / admin123</div>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('error')) {
+      document.getElementById('error-box').style.display = 'block';
+    }
+    if (params.has('logout')) {
+      document.getElementById('logout-box').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

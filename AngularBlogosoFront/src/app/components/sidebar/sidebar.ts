@@ -32,10 +32,12 @@ export class SidebarComponent {
     { label: 'Perfil', path: '/perfil' },
     { label: 'Mi historial', path: '/historial' },
     { label: 'Amigos', path: '/amigos' },
+    { label: 'Mis comentarios', path: '/mis-comentarios' },
   ];
 
   adminNavItems: NavItem[] = [
     { label: 'Gestión de Publicaciones', path: '/admin/posts' },
     { label: 'Gestión de Usuarios', path: '/admin/users' },
+    { label: 'Moderación y Restricciones', path: '/admin/restricciones' },
   ];
 }

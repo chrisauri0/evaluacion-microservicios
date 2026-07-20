@@ -26,6 +26,7 @@ import java.util.UUID;
 @Configuration
 @EnableWebSecurity
 public class AuthorizationServerConfig {
+        private static final String LOGIN_PATH = "/login";
 
     @Bean
 @Order(1)
@@ -39,7 +40,7 @@ public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity h
 
     http.exceptionHandling(exceptions -> exceptions
             .defaultAuthenticationEntryPointFor(
-                    new org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint("/login"),
+                    new org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint(LOGIN_PATH),
                     new org.springframework.security.web.util.matcher.MediaTypeRequestMatcher(org.springframework.http.MediaType.TEXT_HTML)
             )
     );
@@ -52,10 +53,15 @@ public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity h
 public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
     http
             .cors(org.springframework.security.config.Customizer.withDefaults()) // <-- agregar esto también
+            .csrf(csrf -> csrf.ignoringRequestMatchers(LOGIN_PATH))
             .authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers(LOGIN_PATH, "/login.html", "/assets/**").permitAll()
                     .anyRequest().authenticated()
             )
-            .formLogin(org.springframework.security.config.Customizer.withDefaults());
+            .formLogin(form -> form
+                    .loginPage(LOGIN_PATH)
+                    .permitAll()
+            );
 
     return http.build();
 }

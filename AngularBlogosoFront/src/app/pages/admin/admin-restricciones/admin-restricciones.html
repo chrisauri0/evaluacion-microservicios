@@ -1,0 +1,124 @@
+<section>
+  <h1 class="text-2xl font-bold text-gray-900 mb-1">Moderacion y Restricciones</h1>
+  <p class="text-gray-500 mb-6">Controla publicaciones restringidas y usuarios bloqueados.</p>
+
+  @if (error()) {
+    <div class="mb-4 border border-red-200 bg-red-50 text-red-700 rounded-lg px-4 py-3 text-sm">
+      {{ error() }}
+    </div>
+  }
+
+  @if (isLoading()) {
+    <p class="text-gray-500">Cargando panel de restricciones...</p>
+  } @else {
+    <div class="grid gap-6 lg:grid-cols-2">
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+        <h2 class="text-lg font-semibold text-gray-900">Restringir publicacion</h2>
+        <div class="mt-3 grid gap-3">
+          <select
+            [ngModel]="selectedPostId()"
+            (ngModelChange)="selectedPostId.set($event ? +$event : null)"
+            class="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          >
+            <option [ngValue]="null">Selecciona una publicacion</option>
+            @for (post of posts(); track post.id) {
+              <option [ngValue]="post.id">#{{ post.id }} - {{ post.titulo }}</option>
+            }
+          </select>
+
+          <textarea
+            [ngModel]="motivoPost()"
+            (ngModelChange)="motivoPost.set($event)"
+            rows="3"
+            placeholder="Motivo de restriccion"
+            class="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          ></textarea>
+
+          <button
+            type="button"
+            (click)="restringirPost()"
+            class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg"
+          >
+            Restringir post
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+        <h2 class="text-lg font-semibold text-gray-900">Banear usuario</h2>
+        <div class="mt-3 grid gap-3">
+          <select
+            [ngModel]="selectedUsuarioId()"
+            (ngModelChange)="selectedUsuarioId.set($event ? +$event : null)"
+            class="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          >
+            <option [ngValue]="null">Selecciona un usuario</option>
+            @for (usuario of usuarios(); track usuario.id) {
+              <option [ngValue]="usuario.id">#{{ usuario.id }} - {{ usuario.username }}</option>
+            }
+          </select>
+
+          <textarea
+            [ngModel]="motivoUsuario()"
+            (ngModelChange)="motivoUsuario.set($event)"
+            rows="3"
+            placeholder="Motivo de baneo"
+            class="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          ></textarea>
+
+          <button
+            type="button"
+            (click)="banearUsuario()"
+            class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-lg"
+          >
+            Banear usuario
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+        <h2 class="text-lg font-semibold text-gray-900 mb-3">Posts restringidos</h2>
+        <div class="grid gap-3">
+          @for (post of postsRestringidos(); track post.id) {
+            <div class="border border-gray-200 rounded-lg p-3">
+              <p class="text-sm font-semibold text-gray-800">{{ getTituloPost(post.postId) }}</p>
+              <p class="text-xs text-gray-500">Post #{{ post.postId }} | Autor #{{ post.autorId }}</p>
+              <p class="text-sm text-gray-700 mt-1">{{ post.motivo }}</p>
+              <button
+                type="button"
+                (click)="quitarRestriccion(post.postId)"
+                class="mt-2 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg"
+              >
+                Quitar restriccion
+              </button>
+            </div>
+          } @empty {
+            <p class="text-sm text-gray-400">No hay publicaciones restringidas.</p>
+          }
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+        <h2 class="text-lg font-semibold text-gray-900 mb-3">Usuarios baneados</h2>
+        <div class="grid gap-3">
+          @for (usuario of usuariosBaneados(); track usuario.id) {
+            <div class="border border-gray-200 rounded-lg p-3">
+              <p class="text-sm font-semibold text-gray-800">{{ getNombreUsuario(usuario.usuarioId) }}</p>
+              <p class="text-xs text-gray-500">Usuario #{{ usuario.usuarioId }}</p>
+              <p class="text-sm text-gray-700 mt-1">{{ usuario.motivo }}</p>
+              <button
+                type="button"
+                (click)="quitarBaneo(usuario.usuarioId)"
+                class="mt-2 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg"
+              >
+                Quitar baneo
+              </button>
+            </div>
+          } @empty {
+            <p class="text-sm text-gray-400">No hay usuarios baneados.</p>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</section>

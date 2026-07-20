@@ -31,6 +31,6 @@ export class AdminPostsService {
   // RESTRICCIÓN
 
   restringirPost(postId: number, razon: string): Observable<any> {
-    return this.http.post(`${this.gatewayUrl}/restricciones/post`, { postId, razon });
+    return this.http.post(`${this.gatewayUrl}/restricciones/posts`, { postId, razon });
   }
 }
