@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class Usuario {
 
     @Id
-    private Long id; // mismo ID que en auth-server, no autogenerado aquí
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -22,6 +22,9 @@ public class Usuario {
 
     @Column(nullable = false)
     private String nombre;
+
+    @Column(nullable = false)
+    private String rol;
 
     @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro;
