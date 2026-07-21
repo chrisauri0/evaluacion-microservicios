@@ -28,6 +28,11 @@ public class AuthUsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(authUsuarioService.crear(request));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @RequestBody RegistroRequest request) {
+        return ResponseEntity.ok(authUsuarioService.actualizar(id, request));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         authUsuarioService.eliminar(id);

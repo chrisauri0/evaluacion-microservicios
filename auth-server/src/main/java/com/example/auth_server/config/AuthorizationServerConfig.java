@@ -55,9 +55,22 @@ public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws 
             .authorizeHttpRequests(authorize -> authorize
                     .anyRequest().authenticated()
             )
+            .oauth2ResourceServer(oauth2 -> oauth2
+                    .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            )
             .formLogin(org.springframework.security.config.Customizer.withDefaults());
 
     return http.build();
+}
+
+private org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter jwtAuthenticationConverter() {
+    var grantedAuthoritiesConverter = new org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter();
+    grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+    grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
+
+    var converter = new org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter();
+    converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+    return converter;
 }
 
     @Bean

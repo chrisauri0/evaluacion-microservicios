@@ -54,6 +54,31 @@ public class AuthUsuarioService {
     }
 
     @Transactional
+    public Usuario actualizar(Long id, RegistroRequest request) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + id));
+
+        usuario.setUsername(request.getUsername());
+        usuario.setEmail(request.getEmail());
+        usuario.setNombre(request.getNombre());
+        usuario.setRol(request.getRol());
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        usuario = usuarioRepository.save(usuario);
+
+        UsuarioProfileRequest profileRequest = new UsuarioProfileRequest();
+        profileRequest.setId(usuario.getId());
+        profileRequest.setUsername(usuario.getUsername());
+        profileRequest.setEmail(usuario.getEmail());
+        profileRequest.setNombre(usuario.getNombre());
+
+        usuariosClient.actualizarUsuarioProfile(id, profileRequest);
+
+        return usuario;
+    }
+
+    @Transactional
     public void eliminar(Long id) {
         // 1. Eliminar perfil y cascada en el microservicio de usuarios
         usuariosClient.eliminarUsuarioProfile(id);

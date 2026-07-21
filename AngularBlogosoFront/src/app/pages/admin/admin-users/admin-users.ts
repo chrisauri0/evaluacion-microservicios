@@ -25,7 +25,7 @@ export class AdminUsersComponent implements OnInit {
     nombre: new FormControl('', [Validators.required]),
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-    rol: new FormControl('ROLE_USER', Validators.required)
+    rol: new FormControl('USER', Validators.required)
   });
 
   ngOnInit() {
@@ -58,7 +58,7 @@ export class AdminUsersComponent implements OnInit {
   abrirModalCrear() {
     this.isEditing.set(false);
     this.currentEditId.set(null);
-    this.userForm.reset({ rol: 'ROLE_USER' });
+    this.userForm.reset({ rol: 'USER' });
     
     // Al crear, la contraseña SÍ es obligatoria
     this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
@@ -97,7 +97,7 @@ export class AdminUsersComponent implements OnInit {
       nombre: this.userForm.value.nombre ?? '',
       email: this.userForm.value.email ?? '',
       password: this.userForm.value.password ?? undefined,
-      rol: this.userForm.value.rol ?? 'ROLE_USER'
+      rol: this.userForm.value.rol ?? 'USER'
     };
 
     if (this.isEditing() && this.currentEditId()) {
