@@ -32,6 +32,21 @@ public class PerfilUsuario {
     @Column(name = "nombre_privado", nullable = false)
     private boolean nombrePrivado;
 
+    @Column(name = "foto_perfil_solicitada")
+    private String fotoPerfilSolicitada;
+
+    @Column(name = "nombre_perfil_solicitado")
+    private String nombrePerfilSolicitado;
+
+    @Column(name = "descripcion_personal_solicitada", length = 280)
+    private String descripcionPersonalSolicitada;
+
+    @Column(name = "email_privado_solicitado")
+    private Boolean emailPrivadoSolicitado;
+
+    @Column(name = "nombre_privado_solicitado")
+    private Boolean nombrePrivadoSolicitado;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_moderacion", nullable = false)
     private EstadoModeracionPerfil estadoModeracion;

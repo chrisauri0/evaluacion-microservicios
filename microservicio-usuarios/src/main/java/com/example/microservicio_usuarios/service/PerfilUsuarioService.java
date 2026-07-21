@@ -50,16 +50,13 @@ public class PerfilUsuarioService {
 
         validarContenidoApropiado(request.getNombrePerfil(), request.getDescripcionPersonal(), usuarioId, jwt.getSubject());
 
-        perfil.setFotoPerfil(request.getFotoPerfil());
-        perfil.setNombrePerfil(request.getNombrePerfil());
-        perfil.setDescripcionPersonal(request.getDescripcionPersonal());
-        perfil.setEmailPrivado(request.isEmailPrivado());
-        perfil.setNombrePrivado(request.isNombrePrivado());
+        perfil.setFotoPerfilSolicitada(request.getFotoPerfil());
+        perfil.setNombrePerfilSolicitado(request.getNombrePerfil());
+        perfil.setDescripcionPersonalSolicitada(request.getDescripcionPersonal());
+        perfil.setEmailPrivadoSolicitado(request.isEmailPrivado());
+        perfil.setNombrePrivadoSolicitado(request.isNombrePrivado());
         perfil.setEstadoModeracion(EstadoModeracionPerfil.PENDIENTE);
         perfil.setObservacionModeracion("Pendiente de revision de administrador");
-
-        usuario.setNombre(request.getNombrePerfil());
-        usuarioRepository.save(usuario);
 
         PerfilUsuario perfilGuardado = perfilUsuarioRepository.save(perfil);
         registrarRevision(usuarioId, TipoRevisionPerfil.ACTUALIZACION_USUARIO, jwt.getSubject(), "Solicitud de actualizacion de perfil");
@@ -101,12 +98,15 @@ public class PerfilUsuarioService {
 
         boolean aprobado = Boolean.TRUE.equals(request.getAprobado());
         if (aprobado) {
+            aplicarCambiosSolicitados(perfil, usuario);
             perfil.setEstadoModeracion(EstadoModeracionPerfil.APROBADO);
             perfil.setObservacionModeracion(request.getComentario());
+            limpiarCambiosSolicitados(perfil);
             registrarRevision(usuarioId, TipoRevisionPerfil.APROBACION_ADMIN, jwt.getSubject(), request.getComentario());
         } else {
             perfil.setEstadoModeracion(EstadoModeracionPerfil.RECHAZADO);
             perfil.setObservacionModeracion(request.getComentario());
+            limpiarCambiosSolicitados(perfil);
             registrarRevision(usuarioId, TipoRevisionPerfil.RECHAZO_ADMIN, jwt.getSubject(), request.getComentario());
         }
 
@@ -141,24 +141,76 @@ public class PerfilUsuarioService {
     }
 
     private PerfilUsuarioResponse toResponse(PerfilUsuario perfil, Usuario usuario, boolean puedeVerPrivado) {
+        String nombrePerfil = perfil.getNombrePerfil();
+        String descripcionPersonal = perfil.getDescripcionPersonal();
+        String fotoPerfil = perfil.getFotoPerfil();
+        boolean emailPrivado = perfil.isEmailPrivado();
+        boolean nombrePrivado = perfil.isNombrePrivado();
+
+        if (puedeVerPrivado && perfil.getEstadoModeracion() == EstadoModeracionPerfil.PENDIENTE) {
+            nombrePerfil = perfil.getNombrePerfilSolicitado() != null
+                    ? perfil.getNombrePerfilSolicitado()
+                    : nombrePerfil;
+            descripcionPersonal = perfil.getDescripcionPersonalSolicitada() != null
+                    ? perfil.getDescripcionPersonalSolicitada()
+                    : descripcionPersonal;
+            fotoPerfil = perfil.getFotoPerfilSolicitada() != null
+                    ? perfil.getFotoPerfilSolicitada()
+                    : fotoPerfil;
+            emailPrivado = perfil.getEmailPrivadoSolicitado() != null
+                    ? perfil.getEmailPrivadoSolicitado()
+                    : emailPrivado;
+            nombrePrivado = perfil.getNombrePrivadoSolicitado() != null
+                    ? perfil.getNombrePrivadoSolicitado()
+                    : nombrePrivado;
+        }
+
         boolean perfilAprobado = perfil.getEstadoModeracion() == EstadoModeracionPerfil.APROBADO;
-        boolean mostrarNombre = puedeVerPrivado || (!perfil.isNombrePrivado() && perfilAprobado);
-        boolean mostrarEmail = puedeVerPrivado || (!perfil.isEmailPrivado() && perfilAprobado);
+        boolean mostrarNombre = puedeVerPrivado || (!nombrePrivado && perfilAprobado);
+        boolean mostrarEmail = puedeVerPrivado || (!emailPrivado && perfilAprobado);
         boolean mostrarDescripcion = puedeVerPrivado || perfilAprobado;
 
         return PerfilUsuarioResponse.builder()
                 .usuarioId(usuario.getId())
                 .username(usuario.getUsername())
-                .nombrePerfil(mostrarNombre ? perfil.getNombrePerfil() : null)
+                .nombrePerfil(mostrarNombre ? nombrePerfil : null)
                 .email(mostrarEmail ? usuario.getEmail() : null)
-                .descripcionPersonal(mostrarDescripcion ? perfil.getDescripcionPersonal() : null)
-                .fotoPerfil(perfil.getFotoPerfil())
-                .emailPrivado(perfil.isEmailPrivado())
-                .nombrePrivado(perfil.isNombrePrivado())
+                .descripcionPersonal(mostrarDescripcion ? descripcionPersonal : null)
+                .fotoPerfil(fotoPerfil)
+                .emailPrivado(emailPrivado)
+                .nombrePrivado(nombrePrivado)
                 .estadoModeracion(perfil.getEstadoModeracion())
                 .observacionModeracion(puedeVerPrivado ? perfil.getObservacionModeracion() : null)
                 .ultimaActualizacion(perfil.getUltimaActualizacion())
                 .build();
+    }
+
+    private void aplicarCambiosSolicitados(PerfilUsuario perfil, Usuario usuario) {
+        if (perfil.getFotoPerfilSolicitada() != null) {
+            perfil.setFotoPerfil(perfil.getFotoPerfilSolicitada());
+        }
+        if (perfil.getNombrePerfilSolicitado() != null) {
+            perfil.setNombrePerfil(perfil.getNombrePerfilSolicitado());
+            usuario.setNombre(perfil.getNombrePerfilSolicitado());
+            usuarioRepository.save(usuario);
+        }
+        if (perfil.getDescripcionPersonalSolicitada() != null) {
+            perfil.setDescripcionPersonal(perfil.getDescripcionPersonalSolicitada());
+        }
+        if (perfil.getEmailPrivadoSolicitado() != null) {
+            perfil.setEmailPrivado(perfil.getEmailPrivadoSolicitado());
+        }
+        if (perfil.getNombrePrivadoSolicitado() != null) {
+            perfil.setNombrePrivado(perfil.getNombrePrivadoSolicitado());
+        }
+    }
+
+    private void limpiarCambiosSolicitados(PerfilUsuario perfil) {
+        perfil.setFotoPerfilSolicitada(null);
+        perfil.setNombrePerfilSolicitado(null);
+        perfil.setDescripcionPersonalSolicitada(null);
+        perfil.setEmailPrivadoSolicitado(null);
+        perfil.setNombrePrivadoSolicitado(null);
     }
 
     private void validarContenidoApropiado(String nombrePerfil, String descripcion, Long usuarioId, String actor) {
