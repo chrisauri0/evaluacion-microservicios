@@ -1,6 +1,7 @@
 package com.example.microservicio_usuarios.controller;
 
 import com.example.microservicio_usuarios.dto.UsuarioRequest;
+import com.example.microservicio_usuarios.dto.UsuarioDisponibleResponse;
 import com.example.microservicio_usuarios.entity.Usuario;
 import com.example.microservicio_usuarios.service.UsuarioService;
 import org.springframework.http.HttpStatus;
@@ -32,8 +33,8 @@ public class UsuarioController {
     }
 
     @GetMapping("/disponibles")
-    public ResponseEntity<List<Usuario>> listarUsuariosDisponibles() {
-        return ResponseEntity.ok(usuarioService.listarTodos());
+    public ResponseEntity<List<UsuarioDisponibleResponse>> listarUsuariosDisponibles() {
+        return ResponseEntity.ok(usuarioService.listarUsuariosDisponibles());
     }
 
     @GetMapping("/{id}")

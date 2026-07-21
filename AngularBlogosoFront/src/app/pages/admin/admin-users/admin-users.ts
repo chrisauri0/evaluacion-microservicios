@@ -11,7 +11,7 @@ import { AdminUsersService, UsuarioDto, RegistroRequest } from '../../../service
   styleUrls: ['./admin-users.css']
 })
 export class AdminUsersComponent implements OnInit {
-  private adminUsersService = inject(AdminUsersService);
+  private readonly adminUsersService = inject(AdminUsersService);
 
   users = signal<UsuarioDto[]>([]);
   isLoading = signal<boolean>(true);
@@ -102,18 +102,16 @@ export class AdminUsersComponent implements OnInit {
 
     if (this.isEditing() && this.currentEditId()) {
       this.adminUsersService.updateUser(this.currentEditId()!, userData).subscribe({
-        next: (updatedUser: UsuarioDto) => {
-          this.users.update(current => 
-            current.map(u => u.id === updatedUser.id ? updatedUser : u)
-          );
+        next: () => {
+          this.cargarUsuarios();
           this.cerrarModal();
         },
         error: (err: any) => console.error('Error al actualizar', err)
       });
     } else {
       this.adminUsersService.createUser(userData).subscribe({
-        next: (newUser: UsuarioDto) => {
-          this.users.update(current => [newUser, ...current]);
+        next: () => {
+          this.cargarUsuarios();
           this.cerrarModal();
         },
         error: (err: any) => console.error('Error al crear', err)

@@ -12,6 +12,7 @@
         <tr>
           <th>ID</th>
           <th>Usuario</th>
+          <th>Nombre</th>
           <th>Email</th>
           <th>Rol</th>
           <th>Acciones</th>
@@ -23,10 +24,11 @@
             <td>{{ user.id }}</td>
             <td>
               <div class="author-info">
-                <img [src]="user.avatarUrl || 'assets/default-avatar.png'" alt="Avatar" class="avatar-sm">
+                <span class="avatar-sm">{{ user.avatarIcon || '👤' }}</span>
                 <span>{{ user.username }}</span>
               </div>
             </td>
+            <td>{{ user.nombre }}</td>
             <td>{{ user.email }}</td>
             <td>
               <span class="status-badge" [ngClass]="{'approved': user.rol === 'ADMIN', 'pending': user.rol === 'USER'}">
@@ -40,7 +42,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="5" class="empty-state">No hay usuarios registrados.</td>
+            <td colspan="6" class="empty-state">No hay usuarios registrados.</td>
           </tr>
         }
       </tbody>
@@ -49,8 +51,8 @@
 
   <!-- MODAL -->
   @if (isModalOpen()) {
-    <div class="modal-overlay" (click)="cerrarModal()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-overlay">
+      <div class="modal-content">
         <header class="modal-header">
           <h3>{{ isEditing() ? 'Editar Usuario' : 'Nuevo Usuario' }}</h3>
           <button class="btn-close" (click)="cerrarModal()">×</button>

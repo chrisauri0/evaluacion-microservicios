@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../auth/auth.service';
 import { ProfileService } from '../../services/perfil/perfil-service';
+import { UsuariosLookupService } from '../../services/usuarios/usuarios-lookup.service';
 import {
   AvatarCode,
   AVATAR_OPTIONS,
@@ -21,12 +22,13 @@ import {
   templateUrl: './perfil.html',
 })
 export class PerfilComponent implements OnInit {
-  private authService = inject(AuthService);
-  private profileService = inject(ProfileService);
+  private readonly authService = inject(AuthService);
+  private readonly profileService = inject(ProfileService);
+  private readonly usuariosLookupService = inject(UsuariosLookupService);
 
   avatarOptions = AVATAR_OPTIONS;
-  private avatarCodes = new Set<AvatarCode>(AVATAR_OPTIONS.map((option) => option.code));
-  private currentUserId = this.authService.getUserId();
+  private readonly avatarCodes = new Set<AvatarCode>(AVATAR_OPTIONS.map((option) => option.code));
+  private readonly currentUserId = this.authService.getUserId();
 
   profile = signal<PerfilUsuarioResponse | null>(null);
   profileForm = signal<PerfilUsuarioUpdateRequest>({ ...DEFAULT_PROFILE_UPDATE });
@@ -116,6 +118,7 @@ export class PerfilComponent implements OnInit {
         next: (perfil) => {
           this.profile.set(perfil);
           this.inicializarFormulario(perfil);
+          this.usuariosLookupService.invalidateCache();
           this.saveFeedback.set(`Cambios enviados. Estado de moderación: ${perfil.estadoModeracion}.`);
         },
         error: (error: unknown) => {

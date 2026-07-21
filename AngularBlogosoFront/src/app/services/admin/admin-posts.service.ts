@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin, map, Observable } from 'rxjs';
 import { Post, PostCategory } from '../../models/post-card/post-card-model';
 import { AuthService } from '../../auth/auth.service';
-import { UsuariosLookupService } from '../usuarios/usuarios-lookup.service';
+import { UsuariosLookupService, UsuarioLookup } from '../usuarios/usuarios-lookup.service';
 
 interface BackendPost {
   id: number;
@@ -23,18 +23,18 @@ interface PostFormValue {
   providedIn: 'root'
 })
 export class AdminPostsService {
-  private http = inject(HttpClient);
-  private authService = inject(AuthService);
-  private usuariosLookup = inject(UsuariosLookupService);
-  private gatewayUrl = 'http://localhost:8080/api';
+  private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
+  private readonly usuariosLookup = inject(UsuariosLookupService);
+  private readonly gatewayUrl = 'http://localhost:8080/api';
 
   //CRUD
 
   getAllPosts(): Observable<Post[]> {
     return forkJoin({
       posts: this.http.get<BackendPost[]>(`${this.gatewayUrl}/posts`),
-      usernames: this.usuariosLookup.getUsernameMap(),
-    }).pipe(map(({ posts, usernames }) => posts.map((p) => this.toPost(p, usernames))));
+      users: this.usuariosLookup.getLookupMap(),
+    }).pipe(map(({ posts, users }) => posts.map((p) => this.toPost(p, users))));
   }
 
   createPost(post: PostFormValue): Observable<Post> {
@@ -46,8 +46,8 @@ export class AdminPostsService {
     };
     return forkJoin({
       created: this.http.post<BackendPost>(`${this.gatewayUrl}/posts`, body),
-      usernames: this.usuariosLookup.getUsernameMap(),
-    }).pipe(map(({ created, usernames }) => this.toPost(created, usernames)));
+      users: this.usuariosLookup.getLookupMap(),
+    }).pipe(map(({ created, users }) => this.toPost(created, users)));
   }
 
   updatePost(id: number, post: PostFormValue): Observable<Post> {
@@ -59,8 +59,8 @@ export class AdminPostsService {
     };
     return forkJoin({
       updated: this.http.put<BackendPost>(`${this.gatewayUrl}/posts/${id}`, body),
-      usernames: this.usuariosLookup.getUsernameMap(),
-    }).pipe(map(({ updated, usernames }) => this.toPost(updated, usernames)));
+      users: this.usuariosLookup.getLookupMap(),
+    }).pipe(map(({ updated, users }) => this.toPost(updated, users)));
   }
 
   deletePost(id: number): Observable<void> {
@@ -73,12 +73,13 @@ export class AdminPostsService {
     return this.http.post(`${this.gatewayUrl}/restricciones/post`, { postId, razon });
   }
 
-  private toPost(p: BackendPost, usernames: Map<number, string>): Post {
+  private toPost(p: BackendPost, users: Map<number, UsuarioLookup>): Post {
+    const user = users.get(p.autorId);
     return {
       id: String(p.id),
       authorId: String(p.autorId),
-      authorName: usernames.get(p.autorId) ?? `Usuario ${p.autorId}`,
-      authorAvatar: '👤',
+      authorName: user?.displayName ?? `Usuario ${p.autorId}`,
+      authorAvatar: user?.avatarIcon ?? '👤',
       createdAt: new Date(p.fechaCreacion),
       category: p.categoria as PostCategory,
       content: p.contenido,

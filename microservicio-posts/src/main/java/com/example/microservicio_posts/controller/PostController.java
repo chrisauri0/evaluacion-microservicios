@@ -1,6 +1,7 @@
 package com.example.microservicio_posts.controller;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,7 @@ public class PostController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         Long usuarioId = jwt.getClaim("userId");
-        postService.eliminar(id, usuarioId);
+        postService.eliminar(id, usuarioId, esAdmin(jwt));
         return ResponseEntity.noContent().build();
     }
 
@@ -87,6 +88,23 @@ public ResponseEntity<List<PostResponse>> listarMisPublicaciones(
     Long usuarioId = jwt.getClaim("userId");
     return ResponseEntity.ok(postService.listarMisPublicaciones(usuarioId, categoria, desde, hasta));
 }
+
+    private boolean esAdmin(Jwt jwt) {
+        Object roles = jwt.getClaim("roles");
+
+        if (roles instanceof Collection<?> rolesCollection) {
+            return rolesCollection.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .anyMatch("ADMIN"::equalsIgnoreCase);
+        }
+
+        if (roles instanceof String role) {
+            return "ADMIN".equalsIgnoreCase(role);
+        }
+
+        return false;
+    }
 }
 
 //perras

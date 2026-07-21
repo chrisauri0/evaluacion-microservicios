@@ -15,8 +15,8 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './home.html',
 })
 export class HomeComponent implements OnInit {
-  private postService = inject(PostService);
-  private amigosService = inject(AmigosService);
+  private readonly postService = inject(PostService);
+  private readonly amigosService = inject(AmigosService);
 
   posts = this.postService.posts;
   categories: PostCategory[] = ['Anuncios', 'General', 'Preguntas', 'Humor', 'Noticias'];
@@ -46,9 +46,11 @@ export class HomeComponent implements OnInit {
 
 
 
-  constructor(public authService: AuthService,  private http: HttpClient ) {}
+  constructor(public authService: AuthService,  private readonly http: HttpClient ) {}
   
   ngOnInit() {
+    this.postService.refresh();
+
     const currentUserId = this.authService.getUserId();
     
     if (currentUserId) {

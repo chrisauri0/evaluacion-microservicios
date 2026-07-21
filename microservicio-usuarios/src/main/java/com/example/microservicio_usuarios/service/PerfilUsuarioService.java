@@ -58,6 +58,9 @@ public class PerfilUsuarioService {
         perfil.setEstadoModeracion(EstadoModeracionPerfil.PENDIENTE);
         perfil.setObservacionModeracion("Pendiente de revision de administrador");
 
+        usuario.setNombre(request.getNombrePerfil());
+        usuarioRepository.save(usuario);
+
         PerfilUsuario perfilGuardado = perfilUsuarioRepository.save(perfil);
         registrarRevision(usuarioId, TipoRevisionPerfil.ACTUALIZACION_USUARIO, jwt.getSubject(), "Solicitud de actualizacion de perfil");
 

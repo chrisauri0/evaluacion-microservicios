@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { Post, NewPost, Comment } from '../../models/post-card/post-card-model';
 import { AuthService } from '../../auth/auth.service';
-import { UsuariosLookupService } from '../usuarios/usuarios-lookup.service';
+import { UsuariosLookupService, UsuarioLookup } from '../usuarios/usuarios-lookup.service';
 
 interface BackendPost {
   id: number;
@@ -42,9 +42,9 @@ export class PostService {
   refresh(): void {
     forkJoin({
       posts: this.http.get<BackendPost[]>(POSTS_URL),
-      usernames: this.usuariosLookup.getUsernameMap(),
+      users: this.usuariosLookup.getLookupMap(),
     }).subscribe({
-      next: ({ posts, usernames }) => this._posts.set(posts.map((p) => this.toPost(p, usernames))),
+      next: ({ posts, users }) => this._posts.set(posts.map((p) => this.toPost(p, users))),
       error: (err) => console.error('No se pudieron cargar los posts:', err),
     });
   }
@@ -59,10 +59,10 @@ export class PostService {
 
     forkJoin({
       created: this.http.post<BackendPost>(POSTS_URL, body),
-      usernames: this.usuariosLookup.getUsernameMap(),
+      users: this.usuariosLookup.getLookupMap(),
     }).subscribe({
-      next: ({ created, usernames }) =>
-        this._posts.update((posts) => [this.toPost(created, usernames), ...posts]),
+      next: ({ created, users }) =>
+        this._posts.update((posts) => [this.toPost(created, users), ...posts]),
       error: (err) => console.error('No se pudo crear el post:', err),
     });
   }
@@ -80,10 +80,10 @@ export class PostService {
   loadComments(postId: string): void {
     forkJoin({
       comentarios: this.http.get<BackendComentario[]>(`${COMENTARIOS_URL}/post/${postId}`),
-      usernames: this.usuariosLookup.getUsernameMap(),
+      users: this.usuariosLookup.getLookupMap(),
     }).subscribe({
-      next: ({ comentarios, usernames }) => {
-        const comments = comentarios.map((c) => this.toComment(c, usernames));
+      next: ({ comentarios, users }) => {
+        const comments = comentarios.map((c) => this.toComment(c, users));
         this._posts.update((posts) => posts.map((p) => (p.id === postId ? { ...p, comments } : p)));
       },
       error: (err) => console.error('No se pudieron cargar los comentarios:', err),
@@ -99,10 +99,10 @@ export class PostService {
 
     forkJoin({
       created: this.http.post<BackendComentario>(COMENTARIOS_URL, body),
-      usernames: this.usuariosLookup.getUsernameMap(),
+      users: this.usuariosLookup.getLookupMap(),
     }).subscribe({
-      next: ({ created, usernames }) => {
-        const comment = this.toComment(created, usernames);
+      next: ({ created, users }) => {
+        const comment = this.toComment(created, users);
         this._posts.update((posts) =>
           posts.map((p) => (p.id === postId ? { ...p, comments: [...p.comments, comment] } : p)),
         );
@@ -118,12 +118,13 @@ export class PostService {
     });
   }
 
-  private toPost(p: BackendPost, usernames: Map<number, string>): Post {
+  private toPost(p: BackendPost, users: Map<number, UsuarioLookup>): Post {
+    const user = users.get(p.autorId);
     return {
       id: String(p.id),
       authorId: String(p.autorId),
-      authorName: usernames.get(p.autorId) ?? `Usuario ${p.autorId}`,
-      authorAvatar: '👤',
+      authorName: user?.displayName ?? `Usuario ${p.autorId}`,
+      authorAvatar: user?.avatarIcon ?? '👤',
       createdAt: new Date(p.fechaCreacion),
       category: p.categoria as Post['category'],
       content: p.contenido,
@@ -134,12 +135,13 @@ export class PostService {
     };
   }
 
-  private toComment(c: BackendComentario, usernames: Map<number, string>): Comment {
+  private toComment(c: BackendComentario, users: Map<number, UsuarioLookup>): Comment {
+    const user = users.get(c.usuarioId);
     return {
       id: String(c.id),
       postId: String(c.postId),
-      authorName: usernames.get(c.usuarioId) ?? `Usuario ${c.usuarioId}`,
-      authorAvatar: '👤',
+      authorName: user?.displayName ?? `Usuario ${c.usuarioId}`,
+      authorAvatar: user?.avatarIcon ?? '👤',
       content: c.contenido,
       createdAt: new Date(c.fechaCreacion),
     };
