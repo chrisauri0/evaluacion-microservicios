@@ -18,7 +18,6 @@ public class DataSeeder {
                 Usuario admin = new Usuario();
                 admin.setId(1L);
                 admin.setUsername("admin");
-		admin.setNombre("Administrador");
                 admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setRol("ADMIN");
 		admin.setEmail("admin@test.com");
@@ -29,11 +28,10 @@ public class DataSeeder {
                     Usuario usuario = new Usuario();
                     usuario.setId((long) (i + 1));
                     usuario.setUsername("usuario" + i);
-		    usuario.setNombre("Usuario " + i);
                     usuario.setPassword(passwordEncoder.encode("user123"));
                     usuario.setRol("USER");
 		    usuario.setEmail("usuario" + i + "@test.com");
-                    admin.setFechaRegistro(LocalDate.now());
+                    usuario.setFechaRegistro(LocalDate.now());
 		    usuarioRepository.save(usuario);
                 }
                 System.out.println("Usuarios sembrados: admin (id=1), usuario1 (id=2), usuario2 (id=3), usuario3 (id=4)");

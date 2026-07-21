@@ -8,8 +8,8 @@ export interface UsuarioDto {
   email: string;
   nombre: string;
   fechaRegistro?: string;
-  rol?: string;       // Agregado para el HTML
-  avatarUrl?: string; // Agregado para el HTML
+  rol?: string;
+  avatarUrl?: string;
 }
 
 export interface RegistroRequest {
@@ -25,8 +25,7 @@ export interface RegistroRequest {
 })
 export class AdminUsersService {
   private http = inject(HttpClient);
-  // Apuntamos al AUTH-SERVER a través del Gateway
-  private gatewayUrl = 'http://localhost:8080/api/auth/usuarios';
+  private gatewayUrl = 'http://localhost:8080/api/usuarios';
 
   getAllUsers(): Observable<UsuarioDto[]> {
     return this.http.get<UsuarioDto[]>(this.gatewayUrl);

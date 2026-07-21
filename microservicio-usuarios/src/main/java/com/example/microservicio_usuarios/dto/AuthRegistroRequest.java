@@ -3,11 +3,10 @@ package com.example.microservicio_usuarios.dto;
 import lombok.Data;
 
 @Data
-public class UsuarioRequest {
-    private Long id;
+public class AuthRegistroRequest {
     private String username;
-    private String email;
-    private String nombre;
     private String password;
     private String rol;
+    private String email;
+    private String nombre;
 }
