@@ -1,7 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 import { Post, NewPost, Comment } from '../../models/post-card/post-card-model';
 import { AuthService } from '../../auth/auth.service';
+import { UsuariosLookupService } from '../usuarios/usuarios-lookup.service';
 
 interface BackendPost {
   id: number;
@@ -28,6 +30,7 @@ const COMENTARIOS_URL = `${GATEWAY_URL}/comentarios`;
 export class PostService {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
+  private readonly usuariosLookup = inject(UsuariosLookupService);
 
   private readonly _posts = signal<Post[]>([]);
   posts = this._posts.asReadonly();
@@ -37,8 +40,11 @@ export class PostService {
   }
 
   refresh(): void {
-    this.http.get<BackendPost[]>(POSTS_URL).subscribe({
-      next: (backendPosts) => this._posts.set(backendPosts.map((p) => this.toPost(p))),
+    forkJoin({
+      posts: this.http.get<BackendPost[]>(POSTS_URL),
+      usernames: this.usuariosLookup.getUsernameMap(),
+    }).subscribe({
+      next: ({ posts, usernames }) => this._posts.set(posts.map((p) => this.toPost(p, usernames))),
       error: (err) => console.error('No se pudieron cargar los posts:', err),
     });
   }
@@ -51,8 +57,12 @@ export class PostService {
       categoria: newPost.category,
     };
 
-    this.http.post<BackendPost>(POSTS_URL, body).subscribe({
-      next: (created) => this._posts.update((posts) => [this.toPost(created), ...posts]),
+    forkJoin({
+      created: this.http.post<BackendPost>(POSTS_URL, body),
+      usernames: this.usuariosLookup.getUsernameMap(),
+    }).subscribe({
+      next: ({ created, usernames }) =>
+        this._posts.update((posts) => [this.toPost(created, usernames), ...posts]),
       error: (err) => console.error('No se pudo crear el post:', err),
     });
   }
@@ -68,9 +78,12 @@ export class PostService {
   }
 
   loadComments(postId: string): void {
-    this.http.get<BackendComentario[]>(`${COMENTARIOS_URL}/post/${postId}`).subscribe({
-      next: (comentarios) => {
-        const comments = comentarios.map((c) => this.toComment(c));
+    forkJoin({
+      comentarios: this.http.get<BackendComentario[]>(`${COMENTARIOS_URL}/post/${postId}`),
+      usernames: this.usuariosLookup.getUsernameMap(),
+    }).subscribe({
+      next: ({ comentarios, usernames }) => {
+        const comments = comentarios.map((c) => this.toComment(c, usernames));
         this._posts.update((posts) => posts.map((p) => (p.id === postId ? { ...p, comments } : p)));
       },
       error: (err) => console.error('No se pudieron cargar los comentarios:', err),
@@ -84,9 +97,12 @@ export class PostService {
       usuarioId: this.authService.getUserId(),
     };
 
-    this.http.post<BackendComentario>(COMENTARIOS_URL, body).subscribe({
-      next: (created) => {
-        const comment = this.toComment(created);
+    forkJoin({
+      created: this.http.post<BackendComentario>(COMENTARIOS_URL, body),
+      usernames: this.usuariosLookup.getUsernameMap(),
+    }).subscribe({
+      next: ({ created, usernames }) => {
+        const comment = this.toComment(created, usernames);
         this._posts.update((posts) =>
           posts.map((p) => (p.id === postId ? { ...p, comments: [...p.comments, comment] } : p)),
         );
@@ -102,11 +118,11 @@ export class PostService {
     });
   }
 
-  private toPost(p: BackendPost): Post {
+  private toPost(p: BackendPost, usernames: Map<number, string>): Post {
     return {
       id: String(p.id),
       authorId: String(p.autorId),
-      authorName: `Usuario ${p.autorId}`,
+      authorName: usernames.get(p.autorId) ?? `Usuario ${p.autorId}`,
       authorAvatar: '👤',
       createdAt: new Date(p.fechaCreacion),
       category: p.categoria as Post['category'],
@@ -118,11 +134,11 @@ export class PostService {
     };
   }
 
-  private toComment(c: BackendComentario): Comment {
+  private toComment(c: BackendComentario, usernames: Map<number, string>): Comment {
     return {
       id: String(c.id),
       postId: String(c.postId),
-      authorName: `Usuario ${c.usuarioId}`,
+      authorName: usernames.get(c.usuarioId) ?? `Usuario ${c.usuarioId}`,
       authorAvatar: '👤',
       content: c.contenido,
       createdAt: new Date(c.fechaCreacion),
