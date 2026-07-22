@@ -55,6 +55,24 @@ export class AdminPostsComponent implements OnInit {
     }
   }
 
+  toggleEstado(post: Post) {
+    if (post.status === 'hidden') {
+      this.adminPostsService.quitarRestriccion(Number(post.id)).subscribe({
+        next: () => this.posts.update((p) => p.map((x) => (x.id === post.id ? { ...x, status: 'approved' } : x))),
+        error: (err) => console.error('Error al aprobar', err),
+      });
+      return;
+    }
+
+    const motivo = prompt('¿Por qué restringes esta publicación?', 'Contenido inapropiado');
+    if (motivo === null) return;
+
+    this.adminPostsService.restringirPost(Number(post.id), Number(post.authorId), motivo).subscribe({
+      next: () => this.posts.update((p) => p.map((x) => (x.id === post.id ? { ...x, status: 'hidden' } : x))),
+      error: (err) => console.error('Error al restringir', err),
+    });
+  }
+
   // --- LÓGICA DEL MODAL ---
 
   abrirModalCrear() {

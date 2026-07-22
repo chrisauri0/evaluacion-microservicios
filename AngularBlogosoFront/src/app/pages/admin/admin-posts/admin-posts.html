@@ -30,10 +30,16 @@
             <td>{{ post.content | slice:0:40 }}...</td>
             <td><span class="category-tag">{{ post.category }}</span></td>
             <td>
-              <!-- Aplicamos una clase CSS dinámica según el status -->
-              <span class="status-badge" [ngClass]="post.status">
-                {{ post.status }}
-              </span>
+              <!-- Clic para alternar entre aprobado / restringido -->
+              <button
+                type="button"
+                class="status-badge"
+                [ngClass]="post.status"
+                [title]="post.status === 'hidden' ? 'Clic para aprobar' : 'Clic para restringir'"
+                (click)="toggleEstado(post)"
+              >
+                {{ post.status === 'hidden' ? 'No aprobada' : 'Aprobado' }}
+              </button>
             </td>
             <td class="actions">
               <!-- Pendiente conectar estas funciones -->

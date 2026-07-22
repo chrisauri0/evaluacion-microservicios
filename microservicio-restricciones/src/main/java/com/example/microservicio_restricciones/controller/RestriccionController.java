@@ -45,7 +45,6 @@ public class RestriccionController {
     }
 
     @GetMapping("/posts")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PublicacionRestringida>> listarPostsRestringidos() {
         return ResponseEntity.ok(restriccionService.listarPostsRestringidos());
     }

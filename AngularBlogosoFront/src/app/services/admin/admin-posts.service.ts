@@ -4,6 +4,7 @@ import { forkJoin, map, Observable } from 'rxjs';
 import { Post, PostCategory } from '../../models/post-card/post-card-model';
 import { AuthService } from '../../auth/auth.service';
 import { UsuariosLookupService } from '../usuarios/usuarios-lookup.service';
+import { RestriccionesService } from '../restricciones/restricciones.service';
 
 interface BackendPost {
   id: number;
@@ -26,6 +27,7 @@ export class AdminPostsService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
   private usuariosLookup = inject(UsuariosLookupService);
+  private restricciones = inject(RestriccionesService);
   private gatewayUrl = 'http://localhost:8080/api';
 
   //CRUD
@@ -34,7 +36,12 @@ export class AdminPostsService {
     return forkJoin({
       posts: this.http.get<BackendPost[]>(`${this.gatewayUrl}/posts`),
       usernames: this.usuariosLookup.getUsernameMap(),
-    }).pipe(map(({ posts, usernames }) => posts.map((p) => this.toPost(p, usernames))));
+      restringidos: this.restricciones.listarPostsRestringidos(),
+    }).pipe(
+      map(({ posts, usernames, restringidos }) =>
+        posts.map((p) => this.toPost(p, usernames, restringidos.has(p.id))),
+      ),
+    );
   }
 
   createPost(post: PostFormValue): Observable<Post> {
@@ -47,7 +54,7 @@ export class AdminPostsService {
     return forkJoin({
       created: this.http.post<BackendPost>(`${this.gatewayUrl}/posts`, body),
       usernames: this.usuariosLookup.getUsernameMap(),
-    }).pipe(map(({ created, usernames }) => this.toPost(created, usernames)));
+    }).pipe(map(({ created, usernames }) => this.toPost(created, usernames, false)));
   }
 
   updatePost(id: number, post: PostFormValue): Observable<Post> {
@@ -60,7 +67,7 @@ export class AdminPostsService {
     return forkJoin({
       updated: this.http.put<BackendPost>(`${this.gatewayUrl}/posts/${id}`, body),
       usernames: this.usuariosLookup.getUsernameMap(),
-    }).pipe(map(({ updated, usernames }) => this.toPost(updated, usernames)));
+    }).pipe(map(({ updated, usernames }) => this.toPost(updated, usernames, false)));
   }
 
   deletePost(id: number): Observable<void> {
@@ -69,11 +76,15 @@ export class AdminPostsService {
 
   // RESTRICCIÓN
 
-  restringirPost(postId: number, razon: string): Observable<any> {
-    return this.http.post(`${this.gatewayUrl}/restricciones/post`, { postId, razon });
+  restringirPost(postId: number, autorId: number, motivo: string): Observable<unknown> {
+    return this.restricciones.restringir(postId, autorId, motivo);
   }
 
-  private toPost(p: BackendPost, usernames: Map<number, string>): Post {
+  quitarRestriccion(postId: number): Observable<void> {
+    return this.restricciones.quitarRestriccion(postId);
+  }
+
+  private toPost(p: BackendPost, usernames: Map<number, string>, restringido: boolean): Post {
     return {
       id: String(p.id),
       authorId: String(p.autorId),
@@ -82,7 +93,7 @@ export class AdminPostsService {
       createdAt: new Date(p.fechaCreacion),
       category: p.categoria as PostCategory,
       content: p.contenido,
-      status: 'approved',
+      status: restringido ? 'hidden' : 'approved',
       likes: 0,
       reports: 0,
       comments: [],

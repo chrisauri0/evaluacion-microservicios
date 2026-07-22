@@ -4,6 +4,7 @@ import { forkJoin } from 'rxjs';
 import { Post, NewPost, Comment } from '../../models/post-card/post-card-model';
 import { AuthService } from '../../auth/auth.service';
 import { UsuariosLookupService } from '../usuarios/usuarios-lookup.service';
+import { RestriccionesService } from '../restricciones/restricciones.service';
 
 interface BackendPost {
   id: number;
@@ -31,6 +32,7 @@ export class PostService {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
   private readonly usuariosLookup = inject(UsuariosLookupService);
+  private readonly restricciones = inject(RestriccionesService);
 
   private readonly _posts = signal<Post[]>([]);
   posts = this._posts.asReadonly();
@@ -43,8 +45,10 @@ export class PostService {
     forkJoin({
       posts: this.http.get<BackendPost[]>(POSTS_URL),
       usernames: this.usuariosLookup.getUsernameMap(),
+      restringidos: this.restricciones.listarPostsRestringidos(),
     }).subscribe({
-      next: ({ posts, usernames }) => this._posts.set(posts.map((p) => this.toPost(p, usernames))),
+      next: ({ posts, usernames, restringidos }) =>
+        this._posts.set(posts.map((p) => this.toPost(p, usernames, restringidos.has(p.id)))),
       error: (err) => console.error('No se pudieron cargar los posts:', err),
     });
   }
@@ -62,7 +66,7 @@ export class PostService {
       usernames: this.usuariosLookup.getUsernameMap(),
     }).subscribe({
       next: ({ created, usernames }) =>
-        this._posts.update((posts) => [this.toPost(created, usernames), ...posts]),
+        this._posts.update((posts) => [this.toPost(created, usernames, false), ...posts]),
       error: (err) => console.error('No se pudo crear el post:', err),
     });
   }
@@ -118,7 +122,7 @@ export class PostService {
     });
   }
 
-  private toPost(p: BackendPost, usernames: Map<number, string>): Post {
+  private toPost(p: BackendPost, usernames: Map<number, string>, restringido: boolean): Post {
     return {
       id: String(p.id),
       authorId: String(p.autorId),
@@ -127,7 +131,7 @@ export class PostService {
       createdAt: new Date(p.fechaCreacion),
       category: p.categoria as Post['category'],
       content: p.contenido,
-      status: 'approved',
+      status: restringido ? 'hidden' : 'approved',
       likes: 0,
       reports: 0,
       comments: [],
