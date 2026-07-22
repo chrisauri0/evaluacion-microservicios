@@ -65,11 +65,11 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    public PostResponse actualizar(Long id, PostRequest request, Long usuarioIdSolicitante) {
+    public PostResponse actualizar(Long id, PostRequest request, Long usuarioIdSolicitante, boolean esAdmin) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post no encontrado con id: " + id));
 
-        if (!post.getAutorId().equals(usuarioIdSolicitante)) {
+        if (!esAdmin && !post.getAutorId().equals(usuarioIdSolicitante)) {
             throw new AccessDeniedException("No puedes editar publicaciones de otro usuario");
         }
 
@@ -79,11 +79,11 @@ public class PostService {
         return toResponse(postRepository.save(post));
     }
 
-    public void eliminar(Long id, Long usuarioIdSolicitante) {
+    public void eliminar(Long id, Long usuarioIdSolicitante, boolean esAdmin) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post no encontrado con id: " + id));
 
-        if (!post.getAutorId().equals(usuarioIdSolicitante)) {
+        if (!esAdmin && !post.getAutorId().equals(usuarioIdSolicitante)) {
             throw new AccessDeniedException("No puedes eliminar publicaciones de otro usuario");
         }
 

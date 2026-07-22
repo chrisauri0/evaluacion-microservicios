@@ -68,14 +68,19 @@ public class PostController {
     public ResponseEntity<PostResponse> actualizar(@PathVariable Long id, @Valid @RequestBody PostRequest request,
         @AuthenticationPrincipal Jwt jwt) {
         Long usuarioId = jwt.getClaim("userId");
-        return ResponseEntity.ok(postService.actualizar(id, request, usuarioId));
+        return ResponseEntity.ok(postService.actualizar(id, request, usuarioId, esAdmin(jwt)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         Long usuarioId = jwt.getClaim("userId");
-        postService.eliminar(id, usuarioId);
+        postService.eliminar(id, usuarioId, esAdmin(jwt));
         return ResponseEntity.noContent().build();
+    }
+
+    private boolean esAdmin(Jwt jwt) {
+        List<String> roles = jwt.getClaimAsStringList("roles");
+        return roles != null && roles.contains("ADMIN");
     }
 
     @GetMapping("/mis-publicaciones")
