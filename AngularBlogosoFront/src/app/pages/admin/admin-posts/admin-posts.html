@@ -30,20 +30,17 @@
             <td>{{ post.content | slice:0:40 }}...</td>
             <td><span class="category-tag">{{ post.category }}</span></td>
             <td>
-              <!-- Clic para alternar entre aprobado / restringido -->
-              <button
-                type="button"
-                class="status-badge"
-                [ngClass]="post.status"
-                [title]="post.status === 'hidden' ? 'Clic para aprobar' : 'Clic para restringir'"
-                (click)="toggleEstado(post)"
-              >
+              <span class="status-badge" [ngClass]="post.status">
                 {{ post.status === 'hidden' ? 'No aprobada' : 'Aprobado' }}
-              </button>
+              </span>
             </td>
             <td class="actions">
-              <!-- Pendiente conectar estas funciones -->
               <button class="btn btn-edit" (click)="abrirModalEditar(post)">Editar</button>
+              @if (post.status === 'hidden') {
+                <button class="btn btn-primary" (click)="toggleEstado(post)">Aprobar</button>
+              } @else {
+                <button class="btn btn-warning" (click)="toggleEstado(post)">Restringir</button>
+              }
               <button class="btn btn-danger" (click)="eliminarPost(post.id)">Borrar</button>
             </td>
           </tr>

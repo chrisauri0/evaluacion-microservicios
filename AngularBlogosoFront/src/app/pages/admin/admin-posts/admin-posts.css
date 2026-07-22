@@ -85,6 +85,7 @@
 .btn-primary { background-color: #cba6f7; color: #11111b; }
 .btn-edit { background-color: #89b4fa; color: #11111b; margin-right: 5px; }
 .btn-danger { background-color: #f38ba8; color: #11111b; }
+.btn-warning { background-color: #f9e2af; color: #11111b; }
 
 .actions {
   display: flex;

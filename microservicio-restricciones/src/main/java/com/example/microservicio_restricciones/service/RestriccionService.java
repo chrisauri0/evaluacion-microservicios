@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class RestriccionService {
         return publicacionRepo.existsByPostId(postId);
     }
 
+    @Transactional
     public void quitarRestriccion(Long postId) {
         if (!publicacionRepo.existsByPostId(postId)) {
             throw new IllegalStateException("El post no está restringido");
@@ -81,6 +83,7 @@ public class RestriccionService {
         return usuarioBaneadoRepo.existsByUsuarioId(usuarioId);
     }
 
+    @Transactional
     public void quitarBaneo(Long usuarioId) {
         if (!usuarioBaneadoRepo.existsByUsuarioId(usuarioId)) {
             throw new IllegalStateException("El usuario no está baneado");
