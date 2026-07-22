@@ -18,10 +18,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         var usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
+        String rol = usuario.getRol() != null ? usuario.getRol().replace("ROLE_", "") : "USER";
+
         return User.builder()
                 .username(usuario.getUsername())
                 .password(usuario.getPassword())
-                .roles(usuario.getRol())
+                .roles(rol)
                 .build();
     }
 }

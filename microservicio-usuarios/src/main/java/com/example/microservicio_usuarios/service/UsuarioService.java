@@ -45,8 +45,8 @@ public class UsuarioService {
         usuario.setUsername(request.getUsername());
         usuario.setEmail(request.getEmail());
         usuario.setNombre(request.getNombre());
-        usuario.setRol(request.getRol());
-        
+        usuario.setRol(request.getRol() != null ? request.getRol().replace("ROLE_", "") : "USER");
+
         return usuarioRepository.save(usuario);
     }
 
@@ -69,7 +69,7 @@ public class UsuarioService {
             usuario.setUsername(request.getUsername());
         }
         if (request.getRol() != null && !request.getRol().isEmpty()) {
-            usuario.setRol(request.getRol());
+            usuario.setRol(request.getRol().replace("ROLE_", ""));
         }
 
         return usuarioRepository.save(usuario);
